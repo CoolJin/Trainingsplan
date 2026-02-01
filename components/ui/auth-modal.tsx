@@ -74,6 +74,10 @@ export function AuthModal({ onAuthSuccess, ...props }: AuthModalProps) {
 
     // ...
 
+    const handleResend = async () => {
+        await handleEmailContinue();
+    };
+
     return (
         <Modal {...props}>
             <ModalContent
