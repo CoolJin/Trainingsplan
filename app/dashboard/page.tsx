@@ -66,8 +66,13 @@ function DashboardContent() {
             }
 
             const genAI = new GoogleGenerativeAI(apiKey);
-            // Use gemini-1.5-flash (Standard/Stable)
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+            // AUTOMATIC MODEL SELECTION
+            // Try models in order until one works
+            const modelsToTry = ["gemini-1.5-flash", "gemini-1.0-pro", "gemini-pro"];
+            let model = null;
+            let result = null;
+            let lastError = null;
 
             const prompt = `
               Du bist ein professioneller Fitness-Coach. Erstelle einen personalisierten 7-Tage-Trainingsplan.
@@ -93,8 +98,29 @@ function DashboardContent() {
               Antworte NUR mit dem JSON Array.
             `;
 
-            console.log("Sende Anfrage an Gemini (gemini-1.5-flash)...");
-            const result = await model.generateContent(prompt);
+            console.log("Starte Auto-Modell-Selektion...");
+
+            for (const modelName of modelsToTry) {
+                try {
+                    console.log(`Versuche Modell: ${modelName}...`);
+                    const currentModel = genAI.getGenerativeModel({ model: modelName });
+                    result = await currentModel.generateContent(prompt);
+                    // If we get here, it worked!
+                    console.log(`ERFOLG mit Modell: ${modelName}`);
+                    model = currentModel; // not strictly needed but good for reference
+                    break;
+                } catch (e: any) {
+                    console.warn(`Fehler mit Modell ${modelName}:`, e.message);
+                    lastError = e;
+                    // Loop continues...
+                }
+            }
+
+            if (!result) {
+                console.error("Alle Modelle fehlgeschlagen.");
+                throw lastError || new Error("Kein funktionierendes Gemini-Modell gefunden.");
+            }
+
             const response = await result.response;
             const text = response.text();
 
@@ -135,12 +161,12 @@ function DashboardContent() {
             }
 
         } catch (e: any) {
-            console.error("Generierungsfehler:", e);
+            console.error("Generierungsfehler (Final):", e);
             let errorMsg = e.message || JSON.stringify(e);
             if (errorMsg.includes("404")) {
-                errorMsg = "Modell nicht gefunden (404). Prüfe API Key & Modellname.";
+                errorMsg = "Kein Modell gefunden (404). API Key oder Region prüfen.";
             } else if (errorMsg.includes("403")) {
-                errorMsg = "Zugriff verweigert (403). API Key ungültig oderAPI nicht aktiviert.";
+                errorMsg = "Zugriff verweigert (403). API Key ungültig.";
             }
             alert("Fehler bei Generierung: " + errorMsg);
         } finally {
