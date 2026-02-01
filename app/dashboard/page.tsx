@@ -106,47 +106,47 @@ function DashboardContent() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 w-full place-items-center">
                             {/* Card 1: Age */}
                             <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
-                                <h3 className="text-lg font-bold mb-1 text-zinc-400">Alter</h3>
-                                <p className="text-4xl font-bold text-white">
+                                <h3 className="text-lg font-bold mb-1 text-zinc-500">Alter</h3>
+                                <p className="text-4xl font-bold text-zinc-900">
                                     {userPlan?.age || '-'}
                                 </p>
-                                <span className="text-sm text-zinc-500">Jahre</span>
+                                <span className="text-sm text-zinc-400">Jahre</span>
                             </GlareCard>
 
                             {/* Card 2: Weight */}
                             <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
-                                <h3 className="text-lg font-bold mb-1 text-zinc-400">Gewicht</h3>
-                                <p className="text-4xl font-bold text-white">
+                                <h3 className="text-lg font-bold mb-1 text-zinc-500">Gewicht</h3>
+                                <p className="text-4xl font-bold text-zinc-900">
                                     {userPlan?.weight || '-'}
                                 </p>
-                                <span className="text-sm text-zinc-500">{userPlan?.units === 'imperial' ? 'lbs' : 'kg'}</span>
+                                <span className="text-sm text-zinc-400">{userPlan?.units === 'imperial' ? 'lbs' : 'kg'}</span>
                             </GlareCard>
 
                             {/* Card 3: Height */}
                             <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
-                                <h3 className="text-lg font-bold mb-1 text-zinc-400">Größe</h3>
-                                <p className="text-4xl font-bold text-white">
+                                <h3 className="text-lg font-bold mb-1 text-zinc-500">Größe</h3>
+                                <p className="text-4xl font-bold text-zinc-900">
                                     {userPlan?.height || '-'}
                                 </p>
-                                <span className="text-sm text-zinc-500">{userPlan?.units === 'imperial' ? 'ft' : 'cm'}</span>
+                                <span className="text-sm text-zinc-400">{userPlan?.units === 'imperial' ? 'ft' : 'cm'}</span>
                             </GlareCard>
 
                             {/* Card 4: Gender */}
                             <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
-                                <h3 className="text-lg font-bold mb-1 text-zinc-400">Geschlecht</h3>
-                                <div className="text-4xl font-bold text-white mb-2">
+                                <h3 className="text-lg font-bold mb-1 text-zinc-500">Geschlecht</h3>
+                                <div className="text-4xl font-bold text-zinc-900 mb-2">
                                     {userPlan?.gender === 'male' ? 'Männlich' : userPlan?.gender === 'female' ? 'Weiblich' : userPlan?.gender || '-'}
                                 </div>
-                                <User className="w-6 h-6 text-zinc-500" />
+                                <User className="w-6 h-6 text-zinc-400" />
                             </GlareCard>
 
                             {/* Card 5: Goal */}
                             <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
-                                <h3 className="text-lg font-bold mb-1 text-zinc-400">Ziel</h3>
-                                <div className="text-2xl font-bold text-white mb-2 capitalize break-words w-full">
+                                <h3 className="text-lg font-bold mb-1 text-zinc-500">Ziel</h3>
+                                <div className="text-2xl font-bold text-zinc-900 mb-2 capitalize break-words w-full">
                                     {userPlan?.goal?.replace('_', ' ') || '-'}
                                 </div>
-                                <Dumbbell className="w-6 h-6 text-zinc-500" />
+                                <Dumbbell className="w-6 h-6 text-zinc-400" />
                             </GlareCard>
                         </div>
 
