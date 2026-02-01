@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Ruler, Weight, Check, User, Target, Dumbbell, Activity, Flame } from "lucide-react";
 import ProgressIndicator from "@/components/ui/progress-indicator";
 import { ModalPricing } from "@/components/ui/modal-pricing";
-import { getUserProfile, saveUserPlan } from "@/lib/api";
+import { getUserProfile, saveUserPlan, saveOnboardingData } from "@/lib/api";
 
 interface OnboardingFormData {
     units: string;
