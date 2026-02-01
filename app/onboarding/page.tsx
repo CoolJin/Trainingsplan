@@ -92,6 +92,22 @@ export default function OnboardingPage() {
     // Derived state for button disabled
     const canIsProceed = isStepValid();
 
+    const handlePlanSelected = async (planId: string) => {
+        try {
+            const result = await saveUserPlan(planId);
+            if (result.success) {
+                router.push('/dashboard');
+            } else {
+                console.error("Plan save error:", result.error);
+                alert("Failed to save plan. Please try again.");
+                setIsSaving(false); // Allow retry
+            }
+        } catch (e) {
+            console.error("Unexpected error saving plan:", e);
+            setIsSaving(false);
+        }
+    };
+
     const handleNext = async () => {
         if (!canIsProceed) return;
 
@@ -105,25 +121,19 @@ export default function OnboardingPage() {
                 if (result.success) {
                     console.log("Saved!", result);
                     setPricingOpen(true);
+                    // Do NOT set isSaving(false) here, keep it loading while Modal opens
                 } else {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     const errorMsg = (result.error as any)?.message || JSON.stringify(result.error) || "Unknown error";
                     console.error("Save error:", result.error);
-                    // Instead of alert, maybe set an error state to display?
-                    // For now, let's just log it and maybe alert with cleaner message if critical.
-                    // Or better, set 'isSaving' false and show error in UI.
-                    // But to keep it simple and avoid UI rework right now:
                     alert(`Error saving data: ${errorMsg}\nCheck console for details.`);
-                    // Proceed anyway?
-                    setPricingOpen(true); // Let them proceed to pricing even if save failed? 
-                    // The user said "unknown error" blocked them or they saw it.
+                    setIsSaving(false); // Enable retry on error
                 }
             } catch (e) {
                 console.error("Unexpected error saving:", e);
-                router.push('/dashboard');
-            } finally {
                 setIsSaving(false);
             }
+            // Finally block removed to prevent clearing loading state on success
         }
     };
 
@@ -135,6 +145,7 @@ export default function OnboardingPage() {
     };
 
     const handleBack = () => {
+        if (isSaving) return; // Prevent back while saving
         if (step > 1) setStep(step - 1);
         else router.back();
     };
