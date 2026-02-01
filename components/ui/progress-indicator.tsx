@@ -164,11 +164,38 @@ export default function ProgressIndicator({
                             flex: 1,
                         }}
                     >
+                        isLoading?: boolean;
+}
+
+                        export default function ProgressIndicator({
+                            currentStep,
+                            totalSteps,
+                            onNext,
+                            onBack,
+                            className,
+                            disabled = false,
+                            isLoading = false,
+}: ProgressIndicatorProps) {
+    // ... (rest of code) ...
+
+    // I need to be careful with the context chunks logic, simpler to replace the Prop interface and the usage.
+    // But replace_file_content with chunks.
+
+// ...
+                        <ButtonColorful
+                            onClick={handleBack}
+                            className="w-full h-12"
+                            label="Back"
+                            disabled={currentStep <= 1 || isLoading} // Disable back when loading
+                            tabIndex={currentStep <= 1 || isLoading ? -1 : 0}
+                        />
+// ...
                         <ButtonColorful
                             onClick={handleNext}
-                            className={cn("w-full h-12", disabled && "opacity-50 cursor-not-allowed")}
+                            isLoading={isLoading} // Pass loading state
+                            className={cn("w-full h-12", (disabled || isLoading) && "opacity-50 cursor-not-allowed")}
                             label={currentStep === totalSteps ? 'Finish' : 'Continue'}
-                            disabled={disabled}
+                            disabled={disabled || isLoading}
                         />
                     </motion.div>
                 </motion.div>

@@ -175,6 +175,7 @@ export default function OnboardingPage() {
                                 {/* Metric */}
                                 <button
                                     onClick={() => updateData("units", "metric")}
+                                    disabled={isSaving}
                                     className={cn(
                                         "flex items-center justify-between p-6 rounded-2xl border-2 transition-all",
                                         formData.units === "metric"
@@ -349,7 +350,8 @@ export default function OnboardingPage() {
                     totalSteps={totalSteps}
                     onNext={handleNext}
                     onBack={handleBack}
-                    disabled={!canIsProceed}
+                    disabled={!canIsProceed || isSaving}
+                    isLoading={isSaving}
                 />
             </div>
 
