@@ -7,10 +7,7 @@ import { cn } from "@/lib/utils";
 // Define menu items
 const menuItems = [
     { id: 'home', title: "Home", icon: <Home className="w-6 h-6" />, gradientFrom: "#a955ff", gradientTo: "#ea51ff" },
-    { id: 'workouts', title: "Workouts", icon: <Dumbbell className="w-6 h-6" />, gradientFrom: "#56CCF2", gradientTo: "#2F80ED" },
-    { id: 'analytics', title: "Progress", icon: <Activity className="w-6 h-6" />, gradientFrom: "#FF9966", gradientTo: "#FF5E62" },
-    { id: 'community', title: "Community", icon: <Share2 className="w-6 h-6" />, gradientFrom: "#80FF72", gradientTo: "#7EE8FA" },
-    { id: 'profile', title: "Profile", icon: <User className="w-6 h-6" />, gradientFrom: "#ffa9c6", gradientTo: "#f434e2" },
+    { id: 'training', title: "Trainingsplan", icon: <Dumbbell className="w-6 h-6" />, gradientFrom: "#56CCF2", gradientTo: "#2F80ED" },
 ];
 
 interface DashboardDockProps {
