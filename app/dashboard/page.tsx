@@ -8,6 +8,7 @@ import { Dumbbell, User } from "lucide-react";
 import { GlareCard } from "@/components/ui/glare-card";
 import { useSearchParams, useRouter } from "next/navigation";
 import { GradientCardShowcase } from "@/components/ui/gradient-card-showcase";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Gradient colors cycle for the week
 const WEEK_GRADIENTS = [
@@ -51,24 +52,67 @@ function DashboardContent() {
 
     const hasTrainingPlan = userPlan && userPlan.workout_routine;
 
+    // CLIENT-SIDE GENERATION LOGIC
     const handleGenerate = async () => {
         setIsGenerating(true);
         try {
-            const res = await fetch('/api/generate-plan', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(userPlan)
-            });
-            const data = await res.json();
+            const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+            console.log("Using Client-Side Generation. API Key check:", !!apiKey);
 
-            if (data.success && data.plan) {
-                setGeneratedPlan(data.plan);
-            } else {
-                alert("Fehler bei der Generierung: " + (data.error || "Unbekannt"));
+            if (!apiKey) {
+                alert("API Key fehlt! Bitte NEXT_PUBLIC_GEMINI_API_KEY in .env.local oder GitHub Secrets eintragen.");
+                setIsGenerating(false);
+                return;
             }
+
+            const genAI = new GoogleGenerativeAI(apiKey);
+            const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+            const prompt = `
+              Du bist ein professioneller Fitness-Coach. Erstelle einen personalisierten 7-Tage-Trainingsplan (Montag bis Sonntag) basierend auf folgenden Daten:
+              - Alter: ${userPlan?.age || 25}
+              - Geschlecht: ${userPlan?.gender || 'male'}
+              - Gewicht: ${userPlan?.weight || 70} ${userPlan?.units === 'imperial' ? 'lbs' : 'kg'}
+              - Größe: ${userPlan?.height || 180} ${userPlan?.units === 'imperial' ? 'ft' : 'cm'}
+              - Ziel: ${userPlan?.goal || 'General Fitness'}
+
+              Anweisungen:
+              1. Der Plan muss für 7 Tage sein (Montag - Sonntag).
+              2. Ausgabe MUSS ein valides JSON-Objekt sein.
+              JSON Struktur:
+              {
+                "days": [
+                  {
+                    "day_name": "Montag",
+                    "title": "Kurzer Titel",
+                    "desc": "Kurze Beschreibung",
+                    "exercises": [
+                      { "name": "Übungsname", "sets": "3", "reps": "8-12", "notes": "Hinweis" }
+                    ]
+                  }
+                ]
+              }
+              Antworte nur mit dem JSON. Keine Code-Blöcke.
+            `;
+
+            console.log("Sendung an Gemini...");
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            const text = response.text();
+
+            console.log("Gemini Antwort erhalten.");
+            const cleanedText = text.replace(/```json/g, "").replace(/```/g, "").trim();
+            const plan = JSON.parse(cleanedText);
+
+            if (plan && plan.days) {
+                setGeneratedPlan(plan);
+            } else {
+                alert("Fehler: AI hat kein gültiges JSON geliefert.");
+            }
+
         } catch (e: any) {
-            console.error(e);
-            alert("Netzwerkfehler Detail: " + (e.message || JSON.stringify(e)));
+            console.error("Generierungsfehler:", e);
+            alert("Fehler Detail: " + (e.message || JSON.stringify(e)));
         } finally {
             setIsGenerating(false);
         }
@@ -229,12 +273,18 @@ function DashboardContent() {
                                     <ButtonColorful
                                         label="Plan Speichern & Starten"
                                         className="h-12 px-8"
-                                        onClick={() => {
-                                            alert("Plan saved! (TODO: Save to DB)");
-                                            // TODO: Logic to save 'generatedPlan' to DB via api.saveUserPlan()
-                                            // And redirect to Dashboard Home or Training Tab
-                                            // setShowConfetti(true); // Removed
-                                            // router.push('/dashboard?view=training') // reset view
+                                        onClick={async () => {
+                                            try {
+                                                const res = await saveWorkoutRoutine(generatedPlan);
+                                                if (res.success) {
+                                                    // Use window.location to force reload/redirect properly
+                                                    window.location.href = '/dashboard?view=training';
+                                                } else {
+                                                    alert("Fehler beim Speichern des Plans.");
+                                                }
+                                            } catch (e) {
+                                                alert("Fehler beim Speichern.");
+                                            }
                                         }}
                                     />
                                 </div>
