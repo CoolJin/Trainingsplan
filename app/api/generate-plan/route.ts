@@ -1,15 +1,26 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+// Initialize inside handler to avoid top-level crashes if ENV is missing/empty momentarily
+// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || ""); 
 
 export async function POST(req: Request) {
-    try {
-        const { age, gender, weight, height, goal, units } = await req.json();
+  try {
+    console.log("--- API Generate Plan Called ---");
+    const apiKey = process.env.GEMINI_API_KEY;
+    console.log("API Key present:", !!apiKey);
 
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    if (!apiKey) {
+      console.error("API Key is MISSING in process.env");
+      return NextResponse.json({ success: false, error: "Server Configuration Error: API Key Missing" }, { status: 500 });
+    }
 
-        const prompt = `
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const { age, gender, weight, height, goal, units } = await req.json();
+
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+    const prompt = `
       Du bist ein professioneller Fitness-Coach. Erstelle einen personalisierten 7-Tage-Trainingsplan (Montag bis Sonntag) basierend auf folgenden Daten:
       - Alter: ${age}
       - Geschlecht: ${gender}
@@ -39,23 +50,25 @@ export async function POST(req: Request) {
       Antworte nur mit dem JSON.
     `;
 
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
 
-        // Clean up potential markdown code blocks if Gemini adds them
-        const cleanedText = text.replace(/```json/g, "").replace(/```/g, "").trim();
+    console.log("AI Response received (length):", text.length);
 
-        try {
-            const json = JSON.parse(cleanedText);
-            return NextResponse.json({ success: true, plan: json });
-        } catch (parseError) {
-            console.error("JSON Parse Error:", parseError, "Text:", text);
-            return NextResponse.json({ success: false, error: "Failed to parse AI response" }, { status: 500 });
-        }
+    // Clean up potential markdown code blocks if Gemini adds them
+    const cleanedText = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
-    } catch (error) {
-        console.error("API Error:", error);
-        return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
+    try {
+      const json = JSON.parse(cleanedText);
+      return NextResponse.json({ success: true, plan: json });
+    } catch (parseError) {
+      console.error("JSON Parse Error:", parseError, "Text:", text);
+      return NextResponse.json({ success: false, error: "Failed to parse AI response" }, { status: 500 });
     }
+
+  } catch (error: any) {
+    console.error("API Error:", error);
+    return NextResponse.json({ success: false, error: "Internal Server Error: " + error.message }, { status: 500 });
+  }
 }
