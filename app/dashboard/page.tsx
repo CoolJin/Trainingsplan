@@ -66,9 +66,9 @@ function DashboardContent() {
             } else {
                 alert("Fehler bei der Generierung: " + (data.error || "Unbekannt"));
             }
-        } catch (e) {
+        } catch (e: any) {
             console.error(e);
-            alert("Netzwerkfehler");
+            alert("Netzwerkfehler Detail: " + (e.message || JSON.stringify(e)));
         } finally {
             setIsGenerating(false);
         }
