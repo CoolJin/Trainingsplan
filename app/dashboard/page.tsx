@@ -40,7 +40,7 @@ function DashboardContent() {
         <div className="min-h-screen bg-black text-white relative overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-zinc-900/50 via-black to-black -z-10" />
 
-            <main className="container mx-auto px-4 pt-20 pb-32 flex flex-col items-center justify-center min-h-screen transition-all duration-500">
+            <main className="container mx-auto px-4 pt-20 pb-32 flex flex-col items-center justify-center min-h-screen transition-all duration-500 max-w-7xl">
 
                 {/* HOME TAB */}
                 {!isReviewMode && activeTab === "home" && (
