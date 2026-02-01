@@ -57,7 +57,7 @@ export async function saveOnboardingData(data: OnboardingData) {
                     goal: data.goal,
                     // updated_at: new Date() // If column exists
                 }
-            ])
+            ], { onConflict: 'user_id' })
             .select();
 
         if (error) {
