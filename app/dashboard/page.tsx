@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { DashboardDock } from "@/components/ui/dashboard-dock";
 
