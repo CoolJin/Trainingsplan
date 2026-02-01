@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { DashboardDock } from "@/components/ui/dashboard-dock";
 import { ButtonColorful } from "@/components/ui/button-colorful";
-import { getUserProfile } from "@/lib/api";
+import { getUserProfile, saveWorkoutRoutine } from "@/lib/api";
 import { Dumbbell, User } from "lucide-react";
 import { GlareCard } from "@/components/ui/glare-card";
 import { useSearchParams, useRouter } from "next/navigation";
