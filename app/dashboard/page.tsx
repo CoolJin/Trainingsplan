@@ -1,19 +1,34 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { DashboardDock } from "@/components/ui/dashboard-dock";
 import { ButtonColorful } from "@/components/ui/button-colorful";
 import { getUserProfile } from "@/lib/api";
 import { Dumbbell, User } from "lucide-react";
 import { GlareCard } from "@/components/ui/glare-card";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense } from "react";
+import { GradientCardShowcase } from "@/components/ui/gradient-card-showcase";
+
+// Gradient colors cycle for the week
+const WEEK_GRADIENTS = [
+    { from: '#ffbc00', to: '#ff0058' }, // Mon
+    { from: '#03a9f4', to: '#ff0058' }, // Tue
+    { from: '#4dff03', to: '#00d0ff' }, // Wed
+    { from: '#f59e0b', to: '#ef4444' }, // Thu
+    { from: '#8b5cf6', to: '#ec4899' }, // Fri
+    { from: '#06b6d4', to: '#3b82f6' }, // Sat
+    { from: '#10b981', to: '#2563eb' }  // Sun
+];
 
 function DashboardContent() {
     const [activeTab, setActiveTab] = useState("home");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [userPlan, setUserPlan] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [generatedPlan, setGeneratedPlan] = useState<any>(null);
+    const [isGenerating, setIsGenerating] = useState(false);
+
     const searchParams = useSearchParams();
     const router = useRouter();
     const view = searchParams.get('view');
@@ -35,6 +50,38 @@ function DashboardContent() {
     }, []);
 
     const hasTrainingPlan = userPlan && userPlan.workout_routine;
+
+    const handleGenerate = async () => {
+        setIsGenerating(true);
+        try {
+            const res = await fetch('/api/generate-plan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userPlan)
+            });
+            const data = await res.json();
+
+            if (data.success && data.plan) {
+                setGeneratedPlan(data.plan);
+            } else {
+                alert("Fehler bei der Generierung: " + (data.error || "Unbekannt"));
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Netzwerkfehler");
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
+    // Prepare Cards for Showcase if plan exists
+    const showcaseCards = generatedPlan?.days?.map((day: any, idx: number) => ({
+        title: day.title || day.day_name,
+        desc: day.desc || `Training für ${day.day_name}`,
+        dayIndex: idx,
+        gradientFrom: WEEK_GRADIENTS[idx % 7].from,
+        gradientTo: WEEK_GRADIENTS[idx % 7].to
+    })) || [];
 
     return (
         <div className="min-h-screen bg-black text-white relative overflow-hidden">
@@ -93,75 +140,106 @@ function DashboardContent() {
                     </div>
                 )}
 
-                {/* REVIEW MODE (Cards) */}
+                {/* REVIEW MODE (Review OR Showcase) */}
                 {isReviewMode && (
                     <div className="animate-in fade-in zoom-in duration-500 flex flex-col items-center gap-8 w-full max-w-6xl">
-                        <div className="text-center space-y-2">
-                            <h2 className="text-3xl font-bold">Überprüfe deine Daten</h2>
-                            <p className="text-zinc-400 max-w-lg mx-auto">
-                                Diese Daten werden für die Generierung des Trainingsplans verwendet.
-                            </p>
-                        </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 w-full place-items-center">
-                            {/* Card 1: Age */}
-                            <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
-                                <h3 className="text-lg font-bold mb-1 text-zinc-400">Alter</h3>
-                                <p className="text-4xl font-bold text-white">
-                                    {userPlan?.age || '-'}
-                                </p>
-                                <span className="text-sm text-zinc-500">Jahre</span>
-                            </GlareCard>
-
-                            {/* Card 2: Weight */}
-                            <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
-                                <h3 className="text-lg font-bold mb-1 text-zinc-400">Gewicht</h3>
-                                <p className="text-4xl font-bold text-white">
-                                    {userPlan?.weight || '-'}
-                                </p>
-                                <span className="text-sm text-zinc-500">{userPlan?.units === 'imperial' ? 'lbs' : 'kg'}</span>
-                            </GlareCard>
-
-                            {/* Card 3: Height */}
-                            <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
-                                <h3 className="text-lg font-bold mb-1 text-zinc-400">Größe</h3>
-                                <p className="text-4xl font-bold text-white">
-                                    {userPlan?.height || '-'}
-                                </p>
-                                <span className="text-sm text-zinc-500">{userPlan?.units === 'imperial' ? 'ft' : 'cm'}</span>
-                            </GlareCard>
-
-                            {/* Card 4: Gender */}
-                            <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
-                                <h3 className="text-lg font-bold mb-1 text-zinc-400">Geschlecht</h3>
-                                <div className="text-4xl font-bold text-white mb-2">
-                                    {userPlan?.gender === 'male' ? 'Männlich' : userPlan?.gender === 'female' ? 'Weiblich' : userPlan?.gender || '-'}
+                        {!generatedPlan ? (
+                            <>
+                                <div className="text-center space-y-2">
+                                    <h2 className="text-3xl font-bold">Überprüfe deine Daten</h2>
+                                    <p className="text-zinc-400 max-w-lg mx-auto">
+                                        Diese Daten werden für die Generierung des Trainingsplans verwendet.
+                                    </p>
                                 </div>
-                                <User className="w-6 h-6 text-zinc-500" />
-                            </GlareCard>
 
-                            {/* Card 5: Goal */}
-                            <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
-                                <h3 className="text-lg font-bold mb-1 text-zinc-400">Ziel</h3>
-                                <div className="text-2xl font-bold text-white mb-2 capitalize break-words w-full">
-                                    {userPlan?.goal?.replace('_', ' ') || '-'}
+                                <div className="flex flex-wrap justify-center gap-6 w-full">
+                                    {/* Card 1: Age */}
+                                    <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
+                                        <h3 className="text-lg font-bold mb-1 text-zinc-400">Alter</h3>
+                                        <p className="text-4xl font-bold text-white">
+                                            {userPlan?.age || '-'}
+                                        </p>
+                                        <span className="text-sm text-zinc-500">Jahre</span>
+                                    </GlareCard>
+
+                                    {/* Card 2: Weight */}
+                                    <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
+                                        <h3 className="text-lg font-bold mb-1 text-zinc-400">Gewicht</h3>
+                                        <p className="text-4xl font-bold text-white">
+                                            {userPlan?.weight || '-'}
+                                        </p>
+                                        <span className="text-sm text-zinc-500">{userPlan?.units === 'imperial' ? 'lbs' : 'kg'}</span>
+                                    </GlareCard>
+
+                                    {/* Card 3: Height */}
+                                    <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
+                                        <h3 className="text-lg font-bold mb-1 text-zinc-400">Größe</h3>
+                                        <p className="text-4xl font-bold text-white">
+                                            {userPlan?.height || '-'}
+                                        </p>
+                                        <span className="text-sm text-zinc-500">{userPlan?.units === 'imperial' ? 'ft' : 'cm'}</span>
+                                    </GlareCard>
+
+                                    {/* Card 4: Gender */}
+                                    <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
+                                        <h3 className="text-lg font-bold mb-1 text-zinc-400">Geschlecht</h3>
+                                        <div className="text-4xl font-bold text-white mb-2">
+                                            {userPlan?.gender === 'male' ? 'Männlich' : userPlan?.gender === 'female' ? 'Weiblich' : userPlan?.gender || '-'}
+                                        </div>
+                                        <User className="w-6 h-6 text-zinc-500" />
+                                    </GlareCard>
+
+                                    {/* Card 5: Goal */}
+                                    <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
+                                        <h3 className="text-lg font-bold mb-1 text-zinc-400">Ziel</h3>
+                                        <div className="text-2xl font-bold text-white mb-2 capitalize break-words w-full">
+                                            {userPlan?.goal?.replace('_', ' ') || '-'}
+                                        </div>
+                                        <Dumbbell className="w-6 h-6 text-zinc-500" />
+                                    </GlareCard>
                                 </div>
-                                <Dumbbell className="w-6 h-6 text-zinc-500" />
-                            </GlareCard>
-                        </div>
 
-                        <div className="flex gap-4 mt-8 flex-wrap justify-center">
-                            <ButtonColorful
-                                label="Daten Bearbeiten"
-                                className="h-12 px-8 bg-zinc-800 hover:bg-zinc-700"
-                                onClick={() => router.push('/onboarding?edit=true')}
-                            />
-                            <ButtonColorful
-                                label="Jetzt Generieren"
-                                className="h-12 px-8"
-                                onClick={() => alert("Gemini API Integration folgt...")}
-                            />
-                        </div>
+                                <div className="flex gap-4 mt-8 flex-wrap justify-center">
+                                    <ButtonColorful
+                                        label="Daten Bearbeiten"
+                                        className="h-12 px-8 bg-zinc-800 hover:bg-zinc-700"
+                                        onClick={() => router.push('/onboarding?edit=true')}
+                                        disabled={isGenerating}
+                                    />
+                                    <ButtonColorful
+                                        label={isGenerating ? "Generiere Plan..." : "Jetzt Generieren"}
+                                        className="h-12 px-8"
+                                        onClick={handleGenerate}
+                                        disabled={isGenerating}
+                                    />
+                                </div>
+                            </>
+                        ) : (
+                            // SHOW GENERATED PLAN
+                            <div className="w-full flex flex-col items-center animate-in fade-in slide-in-from-bottom-5 duration-700">
+                                <h2 className="text-3xl font-bold mb-2">Dein Trainingsplan</h2>
+                                <p className="text-zinc-400 max-w-lg text-center mb-8">
+                                    Basierend auf deiner Analyse. Wähle einen Tag für Details.
+                                </p>
+
+                                <GradientCardShowcase days={showcaseCards} />
+
+                                <div className="mt-8 flex gap-4">
+                                    <ButtonColorful
+                                        label="Plan Speichern & Starten"
+                                        className="h-12 px-8"
+                                        onClick={() => {
+                                            alert("Plan saved! (TODO: Save to DB)");
+                                            // TODO: Logic to save 'generatedPlan' to DB via api.saveUserPlan()
+                                            // And redirect to Dashboard Home or Training Tab
+                                            setShowConfetti(true); // Maybe?
+                                            // router.push('/dashboard?view=training') // reset view
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 
