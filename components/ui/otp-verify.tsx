@@ -82,8 +82,9 @@ export function OTPVerification({ email = "your.email@example.com", onVerify, on
     return (
         <div className="flex items-center justify-center p-4 w-full h-full">
             <div className="relative w-full max-w-sm overflow-hidden rounded-3xl shadow-2xl bg-zinc-950 border border-white/10">
-                {/* Clean background, no image */}
-                <div className="absolute inset-0 bg-zinc-900/50" />
+                {/* Premium Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-black to-zinc-950 opacity-90" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-transparent to-transparent" />
 
                 <div className="relative z-10 p-8 py-14">
                     <div className="text-center mb-8">
@@ -112,7 +113,6 @@ export function OTPVerification({ email = "your.email@example.com", onVerify, on
                             </div>
                         ))}
                     </div>
-// ...
 
 
                     <div className="text-center mb-8">
