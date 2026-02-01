@@ -66,37 +66,38 @@ function DashboardContent() {
             }
 
             const genAI = new GoogleGenerativeAI(apiKey);
-            // Use gemini-flash-latest (Valid in 2026)
-            const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+            // Use gemini-1.5-flash (Standard/Stable)
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-            const prompt = `
-              Du bist ein professioneller Fitness-Coach. Erstelle einen personalisierten 7-Tage-Trainingsplan (Montag bis Sonntag) basierend auf folgenden Daten:
-              - Alter: ${userPlan?.age || 25}
-              - Geschlecht: ${userPlan?.gender || 'male'}
-              - Gewicht: ${userPlan?.weight || 70} ${userPlan?.units === 'imperial' ? 'lbs' : 'kg'}
-              - Größe: ${userPlan?.height || 180} ${userPlan?.units === 'imperial' ? 'ft' : 'cm'}
-              - Ziel: ${userPlan?.goal || 'General Fitness'}
+              Du bist ein professioneller Fitness - Coach.Erstelle einen personalisierten 7 - Tage - Trainingsplan(Montag bis Sonntag).
+              
+              WICHTIG FORMATIERUNG:
+            1. "day_name" MUSS exakt "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag" sein.
+              2. "title" MUSS kurz sein(z.B. "Push Day", "Cardio", "Ruhetag").
+              3. "desc" MUSS den Fokus beschreiben(z.B. "Brust, Schultern & Trizeps").
 
-              Anweisungen:
-              1. Der Plan muss für 7 Tage sein (Montag - Sonntag).
-              2. Ausgabe MUSS ein valides JSON-Objekt sein.
+                Daten:
+            - Alter: ${ userPlan?.age || 25 }
+            - Geschlecht: ${ userPlan?.gender || 'male' }
+            - Gewicht: ${ userPlan?.weight || 70 }
+            - Ziel: ${ userPlan?.goal || 'General Fitness' }
+
               JSON Struktur:
-              {
+            {
                 "days": [
-                  {
-                    "day_name": "Montag",
-                    "title": "Kurzer Titel",
-                    "desc": "Kurze Beschreibung",
-                    "exercises": [
-                      { "name": "Übungsname", "sets": "3", "reps": "8-12", "notes": "Hinweis" }
-                    ]
-                  }
+                    {
+                        "day_name": "Montag",
+                        "title": "Push Day",
+                        "desc": "Brust und Trizeps Fokus",
+                        "exercises": [
+                            { "name": "Bankdrücken", "sets": "3", "reps": "8-12", "notes": "Langsam absenken" }
+                        ]
+                    }
                 ]
-              }
-              Antworte nur mit dem JSON. Keine Code-Blöcke.
-            `;
+            }
+              Antworte NUR mit dem JSON.
 
-            console.log("Sendung an Gemini...");
+                console.log("Sendung an Gemini...");
             const result = await model.generateContent(prompt);
             const response = await result.response;
             const text = response.text();
@@ -113,7 +114,13 @@ function DashboardContent() {
 
         } catch (e: any) {
             console.error("Generierungsfehler:", e);
-            alert("Fehler Detail: " + (e.message || JSON.stringify(e)));
+            let errorMsg = e.message || JSON.stringify(e);
+            if (errorMsg.includes("404")) {
+                errorMsg = "Modell nicht gefunden (404). Prüfe API Key & Modellname.";
+            } else if (errorMsg.includes("403")) {
+                errorMsg = "Zugriff verweigert (403). API Key ungültig oderAPI nicht aktiviert.";
+            }
+            alert("Fehler bei Generierung: " + errorMsg);
         } finally {
             setIsGenerating(false);
         }
