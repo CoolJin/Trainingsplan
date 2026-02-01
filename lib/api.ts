@@ -96,3 +96,24 @@ export async function saveUserPlan(planId: string) {
         return { success: false, error: e };
     }
 }
+
+export async function saveWorkoutRoutine(routine: any) {
+    const userId = await getCurrentUserId();
+    if (!userId) return { success: false, error: 'Not authenticated' };
+
+    try {
+        const { error } = await supabase
+            .from('user_plans')
+            .upsert({
+                user_id: userId,
+                workout_routine: routine,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'user_id' });
+
+        if (error) throw error;
+        return { success: true };
+    } catch (e) {
+        console.error("Error saving routine:", e);
+        return { success: false, error: e };
+    }
+}
