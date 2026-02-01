@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { DashboardDock } from "@/components/ui/dashboard-dock";
 import { ButtonColorful } from "@/components/ui/button-colorful";
+import { GlareCard } from "@/components/ui/glare-card";
 import { getUserProfile } from "@/lib/api";
 import { Dumbbell } from "lucide-react";
 
