@@ -82,7 +82,7 @@ export async function saveOnboardingData(data: OnboardingData) {
         }
         return { success: true, data: inserted };
     } catch (e) {
-        return { success: true };
+        return { success: false, error: e };
     }
 }
 
