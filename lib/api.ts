@@ -87,16 +87,24 @@ export async function saveOnboardingData(data: OnboardingData) {
 }
 
 export async function saveUserPlan(planId: string) {
-    // ... existing ... implementation omitted for brevity, keeping old one logic if needed? 
-    // Actually I am replacing lines 18-119? 
-    // Wait, I should keep saveUserPlan intact or rewrite it. 
-    // I shall rewrite it to be safe.
-
     const userId = await getCurrentUserId();
-    if (userId) {
-        await supabase.from('user_plans').upsert({ user_id: userId, selected_plan: planId }, { onConflict: 'user_id' });
+
+    if (!userId) {
+        return { success: false, error: 'Not authenticated' };
     }
-    return { success: true };
+
+    try {
+        const { error } = await supabase.from('user_plans').upsert({ user_id: userId, selected_plan: planId }, { onConflict: 'user_id' });
+
+        if (error) {
+            console.error("Supabase Error saving plan:", error);
+            return { success: false, error };
+        }
+
+        return { success: true };
+    } catch (e) {
+        return { success: false, error: e };
+    }
 }
 
 export async function saveWorkoutRoutine(routine: any) {
