@@ -68,8 +68,13 @@ function DashboardContent() {
             const genAI = new GoogleGenerativeAI(apiKey);
 
             // AUTOMATIC MODEL SELECTION
-            // Try models in order until one works
-            const modelsToTry = ["gemini-1.5-flash", "gemini-1.0-pro", "gemini-pro"];
+            // User requested 'latest' versions specifically
+            const modelsToTry = [
+                "gemini-1.5-flash-latest",
+                "gemini-1.5-pro-latest",
+                "gemini-1.5-flash",
+                "gemini-pro"
+            ];
             let model = null;
             let result = null;
             let lastError = null;
