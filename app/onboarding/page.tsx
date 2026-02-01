@@ -120,7 +120,12 @@ export default function OnboardingPage() {
                 const result = await saveOnboardingData(formData);
                 if (result.success) {
                     console.log("Saved!", result);
-                    setPricingOpen(true);
+                    if (isEditMode) {
+                        // Redirect back to Review/Card view
+                        router.push('/dashboard?view=review');
+                    } else {
+                        setPricingOpen(true);
+                    }
                     // Do NOT set isSaving(false) here, keep it loading while Modal opens
                 } else {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
