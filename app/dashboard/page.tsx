@@ -51,42 +51,71 @@ export default function DashboardPage() {
 
                 {/* TRAINING TAB */}
                 {activeTab === "training" && (
-                    <div className="animate-in fade-in slide-in-from-right-10 duration-500 text-center flex flex-col items-center gap-6 w-full max-w-2xl">
-                        {/* Small Greeting as requested */}
+                    <div className="animate-in fade-in slide-in-from-right-10 duration-500 text-center flex flex-col items-center gap-6 w-full max-w-6xl">
+                        {/* Small Greeting */}
                         <div className="flex items-center gap-2 text-zinc-400 mb-2">
                             <Dumbbell className="w-5 h-5" />
                             <span>Dein Trainings-Fokus</span>
                         </div>
 
-                        <h1 className="text-4xl font-bold mb-8">Dein Trainingsplan</h1>
+                        <h1 className="text-4xl font-bold mb-8">Dein Profil & Plan</h1>
 
                         {loading ? (
                             <p className="text-zinc-500">Laden...</p>
                         ) : (
-                            <div className="flex flex-col items-center w-full">
-                                {hasTrainingPlan ? (
-                                    <div className="w-full p-8 border border-zinc-800 rounded-3xl bg-zinc-900/50 backdrop-blur-sm">
+                            <div className="flex flex-col items-center w-full gap-8">
+                                {/* Glare Cards for User Stats */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 w-full justify-items-center">
+                                    <GlareCard className="flex flex-col items-start justify-end py-8 px-6 bg-zinc-900/80">
+                                        <p className="font-bold text-white text-lg">Dein Ziel</p>
+                                        <p className="font-normal text-base text-neutral-200 mt-4 capitalize">
+                                            {userPlan?.goal?.replace('_', ' ') || '-'}
+                                        </p>
+                                    </GlareCard>
+                                    <GlareCard className="flex flex-col items-start justify-end py-8 px-6 bg-zinc-900/80">
+                                        <p className="font-bold text-white text-lg">Geschlecht</p>
+                                        <p className="font-normal text-base text-neutral-200 mt-4 capitalize">
+                                            {userPlan?.gender || '-'}
+                                        </p>
+                                    </GlareCard>
+                                    <GlareCard className="flex flex-col items-start justify-end py-8 px-6 bg-zinc-900/80">
+                                        <p className="font-bold text-white text-lg">Größe</p>
+                                        <p className="font-normal text-base text-neutral-200 mt-4">
+                                            {userPlan?.height || '-'} cm
+                                        </p>
+                                    </GlareCard>
+                                    <GlareCard className="flex flex-col items-start justify-end py-8 px-6 bg-zinc-900/80">
+                                        <p className="font-bold text-white text-lg">Gewicht</p>
+                                        <p className="font-normal text-base text-neutral-200 mt-4">
+                                            {userPlan?.weight || '-'} kg
+                                        </p>
+                                    </GlareCard>
+                                    <GlareCard className="flex flex-col items-start justify-end py-8 px-6 bg-zinc-900/80">
+                                        <p className="font-bold text-white text-lg">Alter</p>
+                                        <p className="font-normal text-base text-neutral-200 mt-4">
+                                            {userPlan?.age || '-'} Jahre
+                                        </p>
+                                    </GlareCard>
+                                </div>
+
+                                <div className="flex flex-col md:flex-row gap-4 w-full justify-center mt-8">
+                                    <ButtonColorful
+                                        label="Daten Bearbeiten"
+                                        className="h-14 px-8 text-lg w-full md:w-auto min-w-[200px] bg-zinc-800 hover:bg-zinc-700"
+                                        onClick={() => window.location.href = '/onboarding?mode=edit'}
+                                    />
+
+                                    <ButtonColorful
+                                        label="Plan Generieren"
+                                        className="h-14 px-8 text-lg w-full md:w-auto min-w-[200px]"
+                                        onClick={() => alert("Gemini API Integration folgt...")}
+                                    />
+                                </div>
+
+                                {hasTrainingPlan && (
+                                    <div className="w-full p-8 border border-zinc-800 rounded-3xl bg-zinc-900/50 backdrop-blur-sm mt-8">
                                         <p className="text-green-400 font-medium mb-2">Plan Aktiv</p>
                                         <p className="text-zinc-300">Dein personalisierter Plan wird bald hier angezeigt.</p>
-                                        {/* Placeholder for actual plan display */}
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col items-center gap-6 p-8 border border-zinc-900 rounded-3xl bg-zinc-950/50 w-full">
-                                        <div className="bg-zinc-900 p-4 rounded-full">
-                                            <Dumbbell className="w-8 h-8 text-white" />
-                                        </div>
-                                        <div className="space-y-2 max-w-md">
-                                            <h3 className="text-xl font-semibold text-white">Noch kein Plan vorhanden?</h3>
-                                            <p className="text-zinc-400">
-                                                Lass dir von unserer AI einen perfekten Plan erstellen, der genau auf dich zugeschnitten ist.
-                                            </p>
-                                        </div>
-
-                                        <ButtonColorful
-                                            label="Trainingsplan Generieren"
-                                            className="h-14 px-8 text-lg w-full md:w-auto min-w-[200px]"
-                                            onClick={() => alert("Gemini API Integration folgt...")}
-                                        />
                                     </div>
                                 )}
                             </div>
