@@ -261,7 +261,7 @@ function OnboardingContent() {
                             <div className="space-y-3">
                                 <label className="text-sm font-medium text-gray-400">Geschlecht</label>
                                 <div className="flex gap-4">
-                                    {['Male', 'Female', 'Other'].map((g) => (
+                                    {['Male', 'Female'].map((g) => (
                                         <button
                                             key={g}
                                             onClick={() => !isSaving && updateData("gender", g)}

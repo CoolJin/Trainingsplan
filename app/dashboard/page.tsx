@@ -64,10 +64,10 @@ export default function DashboardPage() {
                             <p className="text-zinc-500">Laden...</p>
                         ) : (
                             <div className="flex flex-col items-center w-full gap-8">
-                                {/* Glare Cards for User Stats - Responsive Grid */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8 w-full justify-items-center">
+                                {/* Glare Cards for User Stats - Flex Wrap for Normal Size */}
+                                <div className="flex flex-wrap justify-center gap-10 w-full">
                                     {/* Goal */}
-                                    <GlareCard className="flex flex-col items-center justify-start pt-10 px-6 bg-zinc-900/80 w-full max-w-[280px]">
+                                    <GlareCard className="flex flex-col items-center justify-start pt-10 px-6 bg-zinc-900/80">
                                         <p className="font-bold text-white text-xl">Dein Ziel</p>
                                         <div className="flex-1 flex items-center justify-center">
                                             <p className="font-medium text-lg text-neutral-300 capitalize text-center">
@@ -76,7 +76,7 @@ export default function DashboardPage() {
                                         </div>
                                     </GlareCard>
                                     {/* Gender */}
-                                    <GlareCard className="flex flex-col items-center justify-start pt-10 px-6 bg-zinc-900/80 w-full max-w-[280px]">
+                                    <GlareCard className="flex flex-col items-center justify-start pt-10 px-6 bg-zinc-900/80">
                                         <p className="font-bold text-white text-xl">Geschlecht</p>
                                         <div className="flex-1 flex items-center justify-center">
                                             <p className="font-medium text-lg text-neutral-300 capitalize">
@@ -85,7 +85,7 @@ export default function DashboardPage() {
                                         </div>
                                     </GlareCard>
                                     {/* Height */}
-                                    <GlareCard className="flex flex-col items-center justify-start pt-10 px-6 bg-zinc-900/80 w-full max-w-[280px]">
+                                    <GlareCard className="flex flex-col items-center justify-start pt-10 px-6 bg-zinc-900/80">
                                         <p className="font-bold text-white text-xl">Größe</p>
                                         <div className="flex-1 flex items-center justify-center">
                                             <p className="font-medium text-lg text-neutral-300">
@@ -94,7 +94,7 @@ export default function DashboardPage() {
                                         </div>
                                     </GlareCard>
                                     {/* Weight */}
-                                    <GlareCard className="flex flex-col items-center justify-start pt-10 px-6 bg-zinc-900/80 w-full max-w-[280px]">
+                                    <GlareCard className="flex flex-col items-center justify-start pt-10 px-6 bg-zinc-900/80">
                                         <p className="font-bold text-white text-xl">Gewicht</p>
                                         <div className="flex-1 flex items-center justify-center">
                                             <p className="font-medium text-lg text-neutral-300">
@@ -103,7 +103,7 @@ export default function DashboardPage() {
                                         </div>
                                     </GlareCard>
                                     {/* Age */}
-                                    <GlareCard className="flex flex-col items-center justify-start pt-10 px-6 bg-zinc-900/80 w-full max-w-[280px]">
+                                    <GlareCard className="flex flex-col items-center justify-start pt-10 px-6 bg-zinc-900/80">
                                         <p className="font-bold text-white text-xl">Alter</p>
                                         <div className="flex-1 flex items-center justify-center">
                                             <p className="font-medium text-lg text-neutral-300">

@@ -66,8 +66,9 @@ export const GlareCard = ({
     return (
         <div
             style={containerStyle}
+            // Reverted to fixed width 320px as per user request ("resized now... I didn't want them resized")
             className={cn(
-                "relative isolate [contain:layout_style] [perspective:600px] transition-transform duration-[var(--duration)] ease-[var(--easing)] delay-[var(--delay)] will-change-transform w-full max-w-[320px] [aspect-ratio:17/21]",
+                "relative isolate [contain:layout_style] [perspective:600px] transition-transform duration-[var(--duration)] ease-[var(--easing)] delay-[var(--delay)] will-change-transform w-[320px] [aspect-ratio:17/21]",
                 className
             )}
             ref={refElement}
