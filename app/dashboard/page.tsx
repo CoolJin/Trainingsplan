@@ -66,8 +66,8 @@ function DashboardContent() {
             }
 
             const genAI = new GoogleGenerativeAI(apiKey);
-            // Use gemini-1.5-flash which is free, faster, and smarter usually
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            // Use gemini-flash-latest (Valid in 2026)
+            const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
             const prompt = `
               Du bist ein professioneller Fitness-Coach. Erstelle einen personalisierten 7-Tage-Trainingsplan (Montag bis Sonntag) basierend auf folgenden Daten:
