@@ -69,47 +69,69 @@ function DashboardContent() {
             // Use gemini-1.5-flash (Standard/Stable)
             const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-              Du bist ein professioneller Fitness - Coach.Erstelle einen personalisierten 7 - Tage - Trainingsplan(Montag bis Sonntag).
+            const prompt = `
+              Du bist ein professioneller Fitness-Coach. Erstelle einen personalisierten 7-Tage-Trainingsplan.
+
+              Daten:
+              - Alter: ${userPlan?.age || 25}
+              - Geschlecht: ${userPlan?.gender || 'male'}
+              - Gewicht: ${userPlan?.weight || 70}
+              - Ziel: ${userPlan?.goal || 'General Fitness'}
+
+              Anweisung:
+              Erstelle ein Array mit genau 7 Objekten (für Montag bis Sonntag).
+              Jedes Objekt soll enthalten: "title", "desc", "exercises".
               
-              WICHTIG FORMATIERUNG:
-            1. "day_name" MUSS exakt "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag" sein.
-              2. "title" MUSS kurz sein(z.B. "Push Day", "Cardio", "Ruhetag").
-              3. "desc" MUSS den Fokus beschreiben(z.B. "Brust, Schultern & Trizeps").
+              JSON Struktur (Array):
+              [
+                  {
+                    "title": "Push Day",
+                    "desc": "Brustfokus",
+                    "exercises": [ { "name": "Bankdrücken", "sets": "3", "reps": "8-12", "notes": "..." } ]
+                  }
+              ]
+              Antworte NUR mit dem JSON Array.
+            `;
 
-                Daten:
-            - Alter: ${ userPlan?.age || 25 }
-            - Geschlecht: ${ userPlan?.gender || 'male' }
-            - Gewicht: ${ userPlan?.weight || 70 }
-            - Ziel: ${ userPlan?.goal || 'General Fitness' }
-
-              JSON Struktur:
-            {
-                "days": [
-                    {
-                        "day_name": "Montag",
-                        "title": "Push Day",
-                        "desc": "Brust und Trizeps Fokus",
-                        "exercises": [
-                            { "name": "Bankdrücken", "sets": "3", "reps": "8-12", "notes": "Langsam absenken" }
-                        ]
-                    }
-                ]
-            }
-              Antworte NUR mit dem JSON.
-
-                console.log("Sendung an Gemini...");
+            console.log("Sende Anfrage an Gemini (gemini-1.5-flash)...");
             const result = await model.generateContent(prompt);
             const response = await result.response;
             const text = response.text();
 
             console.log("Gemini Antwort erhalten.");
             const cleanedText = text.replace(/```json/g, "").replace(/```/g, "").trim();
-            const plan = JSON.parse(cleanedText);
 
-            if (plan && plan.days) {
-                setGeneratedPlan(plan);
-            } else {
-                alert("Fehler: AI hat kein gültiges JSON geliefert.");
+            try {
+                const daysArray = JSON.parse(cleanedText);
+
+                if (Array.isArray(daysArray) && daysArray.length > 0) {
+                    // Hydrate static day names efficiently
+                    const dayNames = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
+
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const hydratedDays = daysArray.map((day: any, index: number) => ({
+                        ...day,
+                        day_name: dayNames[index % 7] // Assign correct day name statically
+                    }));
+
+                    setGeneratedPlan({ days: hydratedDays });
+
+                } else if (daysArray.days) {
+                    // Fallback if AI returned object instead of array
+                    const dayNames = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const hydratedDays = daysArray.days.map((day: any, index: number) => ({
+                        ...day,
+                        day_name: dayNames[index % 7]
+                    }));
+                    setGeneratedPlan({ days: hydratedDays });
+                } else {
+                    alert("Fehler: AI hat kein gültiges Format geliefert.");
+                    console.warn("Invalid Format:", daysArray);
+                }
+            } catch (jsonError) {
+                console.error("JSON Parse Error:", jsonError);
+                alert("Fehler: AI Antwort war kein gültiges JSON.");
             }
 
         } catch (e: any) {
