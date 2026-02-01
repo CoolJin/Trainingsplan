@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Ruler, Weight, Check, User, Target, Dumbbell, Activity, Flame } from "lucide-react";
+import { cn } from "@/lib/utils";
 import ProgressIndicator from "@/components/ui/progress-indicator";
 import { ModalPricing } from "@/components/ui/modal-pricing";
 import { getUserProfile, saveUserPlan, saveOnboardingData } from "@/lib/api";
