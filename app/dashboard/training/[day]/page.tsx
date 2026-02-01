@@ -8,6 +8,14 @@ import { ArrowLeft, Play, Clock, Repeat } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 
+// Required for Static Export (GitHub Pages)
+// Generates /0, /1, ... /6
+export function generateStaticParams() {
+    return Array.from({ length: 7 }, (_, i) => ({
+        day: i.toString(),
+    }));
+}
+
 export default function DayDetailPage() {
     const [dayPlan, setDayPlan] = useState<any>(null);
     const [loading, setLoading] = useState(true);
