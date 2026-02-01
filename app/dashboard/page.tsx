@@ -18,9 +18,6 @@ function DashboardContent() {
     const router = useRouter();
     const view = searchParams.get('view');
 
-    // Sync 'view' query param with internal state if needed, or just use query param?
-    // User wants "Review View" which might be distinct from tabs.
-    // Let's implement "Review" as a pseudo-tab override.
     const isReviewMode = view === 'review';
 
     useEffect(() => {
@@ -38,10 +35,6 @@ function DashboardContent() {
     }, []);
 
     const hasTrainingPlan = userPlan && userPlan.workout_routine;
-
-    // Handle "Review" state separately? Or as a modifier to 'training' tab?
-    // User said "Redirect to next page... cards".
-    // If isReviewMode, we show the review content instead of the standard training tab.
 
     return (
         <div className="min-h-screen bg-black text-white relative overflow-hidden">
@@ -102,43 +95,58 @@ function DashboardContent() {
 
                 {/* REVIEW MODE (Cards) */}
                 {isReviewMode && (
-                    <div className="animate-in fade-in zoom-in duration-500 flex flex-col items-center gap-8 w-full">
-                        <h2 className="text-3xl font-bold mb-4">Überprüfe deine Daten</h2>
+                    <div className="animate-in fade-in zoom-in duration-500 flex flex-col items-center gap-8 w-full max-w-6xl">
+                        <div className="text-center space-y-2">
+                            <h2 className="text-3xl font-bold">Überprüfe deine Daten</h2>
+                            <p className="text-zinc-400 max-w-lg mx-auto">
+                                Diese Daten werden für die Generierung des Trainingsplans verwendet.
+                            </p>
+                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {/* Card 1: Age/Biometrics */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 w-full place-items-center">
+                            {/* Card 1: Age */}
                             <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
-                                <User className="w-12 h-12 mb-4 text-white" />
-                                <h3 className="text-lg font-bold mb-1">Über Dich</h3>
-                                <p className="text-zinc-400">
-                                    {userPlan?.age || '-'} Jahre<br />
-                                    {userPlan?.weight || '-'} kg / {userPlan?.height || '-'} cm
+                                <h3 className="text-lg font-bold mb-1 text-zinc-400">Alter</h3>
+                                <p className="text-4xl font-bold text-white">
+                                    {userPlan?.age || '-'}
                                 </p>
+                                <span className="text-sm text-zinc-500">Jahre</span>
                             </GlareCard>
 
-                            {/* Card 2: Goal */}
+                            {/* Card 2: Weight */}
                             <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
-                                <Dumbbell className="w-12 h-12 mb-4 text-white" />
-                                <h3 className="text-lg font-bold mb-1">Dein Ziel</h3>
-                                <p className="text-zinc-400 capitalize">
-                                    {userPlan?.goal?.replace('_', ' ') || 'Nicht angegeben'}
+                                <h3 className="text-lg font-bold mb-1 text-zinc-400">Gewicht</h3>
+                                <p className="text-4xl font-bold text-white">
+                                    {userPlan?.weight || '-'}
                                 </p>
+                                <span className="text-sm text-zinc-500">{userPlan?.units === 'imperial' ? 'lbs' : 'kg'}</span>
                             </GlareCard>
-                            {/* Card 3: Gender/Units */}
+
+                            {/* Card 3: Height */}
                             <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
-                                <div className="text-4xl font-bold mb-2 text-white">{userPlan?.gender === 'male' ? '♂' : userPlan?.gender === 'female' ? '♀' : '?'}</div>
-                                <h3 className="text-lg font-bold mb-1">Details</h3>
-                                <p className="text-zinc-400 capitalize">
-                                    {userPlan?.gender || '-'}<br />
-                                    {userPlan?.units || 'Metric'}
+                                <h3 className="text-lg font-bold mb-1 text-zinc-400">Größe</h3>
+                                <p className="text-4xl font-bold text-white">
+                                    {userPlan?.height || '-'}
                                 </p>
+                                <span className="text-sm text-zinc-500">{userPlan?.units === 'imperial' ? 'ft' : 'cm'}</span>
                             </GlareCard>
-                            {/* Card 4: Placeholder/Summary */}
-                            <GlareCard className="flex flex-col items-center justify-center p-6 text-center bg-zinc-900/50">
-                                <h3 className="text-lg font-bold mb-2">Bereit?</h3>
-                                <p className="text-zinc-500 text-sm">
-                                    Deine Daten werden für die AI-Generierung verwendet.
-                                </p>
+
+                            {/* Card 4: Gender */}
+                            <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
+                                <h3 className="text-lg font-bold mb-1 text-zinc-400">Geschlecht</h3>
+                                <div className="text-4xl font-bold text-white mb-2">
+                                    {userPlan?.gender === 'male' ? 'Männlich' : userPlan?.gender === 'female' ? 'Weiblich' : userPlan?.gender || '-'}
+                                </div>
+                                <User className="w-6 h-6 text-zinc-500" />
+                            </GlareCard>
+
+                            {/* Card 5: Goal */}
+                            <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
+                                <h3 className="text-lg font-bold mb-1 text-zinc-400">Ziel</h3>
+                                <div className="text-2xl font-bold text-white mb-2 capitalize break-words w-full">
+                                    {userPlan?.goal?.replace('_', ' ') || '-'}
+                                </div>
+                                <Dumbbell className="w-6 h-6 text-zinc-500" />
                             </GlareCard>
                         </div>
 
@@ -159,7 +167,6 @@ function DashboardContent() {
 
             </main>
 
-            {/* Hide Dock in Review Mode? Or Keep? User didn't say. Keeping it is safer for navigation. */}
             {!isReviewMode && <DashboardDock activeTab={activeTab} onTabChange={setActiveTab} />}
         </div>
     );
