@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Ruler, Weight, Check, User, Target, Dumbbell, Activity, Flame } from "lucide-react";
@@ -20,7 +20,7 @@ interface OnboardingFormData {
     dietaryPreference?: string;
 }
 
-export default function OnboardingPage() {
+function OnboardingContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const isEditMode = searchParams.get('mode') === 'edit';
@@ -40,7 +40,6 @@ export default function OnboardingPage() {
     });
 
     const [isSaving, setIsSaving] = useState(false);
-    const [authModalOpen, setAuthModalOpen] = useState(false);
     const [pricingOpen, setPricingOpen] = useState(false);
 
     // Load existing data if Edit Mode
@@ -132,7 +131,6 @@ export default function OnboardingPage() {
                         setIsSaving(false);
                     } else {
                         setPricingOpen(true);
-                        // Do NOT set isSaving(false) here, keep it loading while Modal opens
                     }
                 } else {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -164,9 +162,6 @@ export default function OnboardingPage() {
         if (step > 1) setStep(step - 1);
         else router.back();
     };
-
-    // Animation variants
-    // ... we can just use inline or standard motion props
 
     return (
         <motion.div
@@ -396,5 +391,13 @@ export default function OnboardingPage() {
                 onPlanSelected={handlePlanSelected}
             />
         </motion.div>
+    );
+}
+
+export default function OnboardingPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-black text-white flex items-center justify-center">Laden...</div>}>
+            <OnboardingContent />
+        </Suspense>
     );
 }
