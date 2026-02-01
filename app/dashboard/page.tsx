@@ -233,7 +233,7 @@ function DashboardContent() {
                                             alert("Plan saved! (TODO: Save to DB)");
                                             // TODO: Logic to save 'generatedPlan' to DB via api.saveUserPlan()
                                             // And redirect to Dashboard Home or Training Tab
-                                            setShowConfetti(true); // Maybe?
+                                            // setShowConfetti(true); // Removed
                                             // router.push('/dashboard?view=training') // reset view
                                         }}
                                     />
