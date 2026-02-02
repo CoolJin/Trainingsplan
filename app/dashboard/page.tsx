@@ -68,13 +68,15 @@ function DashboardContent() {
             const genAI = new GoogleGenerativeAI(apiKey);
 
             // AUTOMATIC MODEL SELECTION
-            // User requested 'latest' versions specifically
+            // Based on verification script: 
+            // - 'gemini-flash-latest' WORKS (Success)
+            // - 'gemini-2.0-flash' Exists (But hits Quota)
+            // - 'gemini-1.5' family returns 404 (on this key)
             const modelsToTry = [
-                "gemini-1.5-flash-latest",
-                "gemini-1.5-pro-latest",
-                "gemini-1.5-flash",
-                "gemini-pro"
+                "gemini-flash-latest",
+                "gemini-2.0-flash"
             ];
+
             let model = null;
             let result = null;
             let lastError = null;
@@ -112,7 +114,7 @@ function DashboardContent() {
                     result = await currentModel.generateContent(prompt);
                     // If we get here, it worked!
                     console.log(`ERFOLG mit Modell: ${modelName}`);
-                    model = currentModel; // not strictly needed but good for reference
+                    model = currentModel;
                     break;
                 } catch (e: any) {
                     console.warn(`Fehler mit Modell ${modelName}:`, e.message);
@@ -123,6 +125,10 @@ function DashboardContent() {
 
             if (!result) {
                 console.error("Alle Modelle fehlgeschlagen.");
+                // Provide specific advice based on the last error
+                if (lastError?.message?.includes("429")) {
+                    throw new Error("Quota/Limit erreicht (429). Bitte warten oder API Plan prüfen.");
+                }
                 throw lastError || new Error("Kein funktionierendes Gemini-Modell gefunden.");
             }
 
