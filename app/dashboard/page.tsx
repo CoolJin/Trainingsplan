@@ -209,7 +209,7 @@ function DashboardContent() {
             await deleteUserPlan();
             setGeneratedPlan(null);
             setUserPlan({ ...userPlan, workout_routine: null });
-            // Optionally redirect or refresh
+            // Redirect to dashboard home to avoid confusion
             window.location.href = '/dashboard';
         }
     };
@@ -225,6 +225,14 @@ function DashboardContent() {
         gradientFrom: WEEK_GRADIENTS[idx % 7].from,
         gradientTo: WEEK_GRADIENTS[idx % 7].to
     })) || [];
+
+    const DURATION_OPTIONS = [
+        "30-45 Min",
+        "45-60 Min",
+        "60-90 Min",
+        "90-120 Min",
+        "120+ Min"
+    ];
 
     return (
         <div className="min-h-screen bg-black text-white relative overflow-hidden">
@@ -346,8 +354,8 @@ function DashboardContent() {
                                             <Clock className="w-4 h-4 text-blue-500" />
                                             Dauer pro Einheit
                                         </label>
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                                            {["30 Min", "45-60 Min", "60-90 Min", "90+ Min"].map((dur) => (
+                                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+                                            {DURATION_OPTIONS.map((dur) => (
                                                 <button
                                                     key={dur}
                                                     onClick={() => setSessionDuration(dur)}
@@ -410,7 +418,6 @@ function DashboardContent() {
                                     <ButtonColorful
                                         label="Zurück zur Konfiguration"
                                         className="h-12 px-8 bg-zinc-800 hover:bg-zinc-700"
-                                        onChange={() => setGeneratedPlan(null)} // This line is slightly wrong semantics wise, fixed below
                                         onClick={() => setGeneratedPlan(null)}
                                     />
                                     <ButtonColorful
@@ -420,7 +427,7 @@ function DashboardContent() {
                                             try {
                                                 const res = await saveWorkoutRoutine(generatedPlan);
                                                 if (res.success) {
-                                                    // Use window.location to force reload/redirect properly
+                                                    // Force redirect to current Plan View
                                                     window.location.href = '/dashboard?view=training';
                                                 } else {
                                                     alert("Fehler beim Speichern des Plans.");
