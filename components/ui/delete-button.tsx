@@ -107,12 +107,13 @@ export function NativeDelete({
                 {/* Main Delete/Confirm button */}
                 <motion.div layout whileHover={!disabled ? { scale: 1.02 } : undefined} whileTap={!disabled ? { scale: 0.98 } : undefined}>
                     <Button
-                        variant="destructive"
-                        size="default"
                         className={cn(
                             sizeVariants[size],
-                            "cursor-pointer transition-shadow text-white",
-                            isExpanded ? "bg-red-600 hover:bg-red-700" : "bg-zinc-800 hover:bg-red-900/50 text-red-400 hover:text-red-300",
+                            "relative overflow-hidden transition-all duration-200 group text-white",
+                            isExpanded
+                                ? "bg-red-900/40"
+                                : "bg-zinc-900 hover:bg-zinc-800",
+                            className,
                             disabled && "opacity-50 cursor-not-allowed"
                         )}
                         onClick={isExpanded ? handleConfirm : handleDeleteClick}
@@ -120,35 +121,48 @@ export function NativeDelete({
                         aria-label={isExpanded ? confirmText : buttonText}
                         type="button"
                     >
-                        <AnimatePresence mode="wait" initial={false}>
-                            {showIcon && (
-                                <motion.span
-                                    key={isExpanded ? "check-icon" : "trash-icon"}
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.8 }}
-                                    transition={{ duration: 0.15 }}
-                                    className="mr-2 flex items-center"
-                                >
-                                    {isExpanded ? (
-                                        <Check className={iconSizeVariants[size]} />
-                                    ) : (
-                                        <Trash2 className={iconSizeVariants[size]} />
-                                    )}
-                                </motion.span>
+                        {/* Gradient Background Effect (Adaptive) */}
+                        <div
+                            className={cn(
+                                "absolute inset-0 transition-opacity duration-500 blur opacity-40 group-hover:opacity-80",
+                                isExpanded
+                                    ? "bg-gradient-to-r from-red-500 via-orange-500 to-red-500 animate-pulse" // WARNING STATE
+                                    : "bg-gradient-to-r from-red-900 via-red-800 to-zinc-900 opacity-20 group-hover:opacity-60" // IDLE STATE (Subtle)
                             )}
-                        </AnimatePresence>
-                        <AnimatePresence mode="wait" initial={false}>
-                            <motion.span
-                                key={isExpanded ? "confirm" : "delete"}
-                                initial={{ opacity: 0, y: 4 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -4 }}
-                                transition={{ duration: 0.15 }}
-                            >
-                                {isExpanded ? confirmText : buttonText}
-                            </motion.span>
-                        </AnimatePresence>
+                        />
+
+                        {/* Content Container (Relative to sit above gradient) */}
+                        <div className="relative flex items-center justify-center gap-2 z-10">
+                            <AnimatePresence mode="wait" initial={false}>
+                                {showIcon && (
+                                    <motion.span
+                                        key={isExpanded ? "check-icon" : "trash-icon"}
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.8 }}
+                                        transition={{ duration: 0.15 }}
+                                        className="flex items-center"
+                                    >
+                                        {isExpanded ? (
+                                            <Check className={iconSizeVariants[size]} />
+                                        ) : (
+                                            <Trash2 className={iconSizeVariants[size]} />
+                                        )}
+                                    </motion.span>
+                                )}
+                            </AnimatePresence>
+                            <AnimatePresence mode="wait" initial={false}>
+                                <motion.span
+                                    key={isExpanded ? "confirm" : "delete"}
+                                    initial={{ opacity: 0, y: 4 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -4 }}
+                                    transition={{ duration: 0.15 }}
+                                >
+                                    {isExpanded ? confirmText : buttonText}
+                                </motion.span>
+                            </AnimatePresence>
+                        </div>
                     </Button>
                 </motion.div>
 
