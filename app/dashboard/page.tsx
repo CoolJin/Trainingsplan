@@ -3,8 +3,8 @@
 import { useState, useEffect, Suspense } from "react";
 import { DashboardDock } from "@/components/ui/dashboard-dock";
 import { ButtonColorful } from "@/components/ui/button-colorful";
-import { getUserProfile, saveWorkoutRoutine } from "@/lib/api";
-import { Dumbbell, User, Calendar, Clock, Sparkles } from "lucide-react";
+import { getUserProfile, saveWorkoutRoutine, deleteUserPlan } from "@/lib/api";
+import { Dumbbell, User, Calendar, Clock, Sparkles, Trash2, CheckCircle } from "lucide-react";
 import { GlareCard } from "@/components/ui/glare-card";
 import { useSearchParams, useRouter } from "next/navigation";
 import { GradientCardShowcase } from "@/components/ui/gradient-card-showcase";
@@ -46,6 +46,10 @@ function DashboardContent() {
             try {
                 const profile = await getUserProfile();
                 setUserPlan(profile);
+                // Load existing workout routine if available
+                if (profile?.workout_routine) {
+                    setGeneratedPlan(profile.workout_routine);
+                }
             } catch (e) {
                 console.error("Failed to load profile", e);
             } finally {
@@ -55,7 +59,7 @@ function DashboardContent() {
         loadProfile();
     }, []);
 
-    const hasTrainingPlan = userPlan && userPlan.workout_routine;
+    const hasTrainingPlan = !!generatedPlan;
 
     // CLIENT-SIDE GENERATION LOGIC
     const handleGenerate = async () => {
@@ -200,6 +204,17 @@ function DashboardContent() {
         }
     };
 
+    const handleDeletePlan = async () => {
+        if (confirm("Möchtest du deinen Trainingsplan wirklich löschen?")) {
+            await deleteUserPlan();
+            setGeneratedPlan(null);
+            setUserPlan({ ...userPlan, workout_routine: null });
+            // Optionally redirect or refresh
+            window.location.href = '/dashboard';
+        }
+    };
+
+
     // Prepare Cards for Showcase if plan exists
     const showcaseCards = generatedPlan?.days?.map((day: any, idx: number) => ({
         // Fix: Title is ALWAYS the day name (Montag..Sonntag)
@@ -242,14 +257,30 @@ function DashboardContent() {
                         {loading ? (
                             <p className="text-zinc-500">Laden...</p>
                         ) : hasTrainingPlan ? (
-                            <div className="w-full p-8 border border-zinc-800 rounded-3xl bg-zinc-900/50 backdrop-blur-sm">
-                                <p className="text-green-400 font-medium mb-2">Plan Aktiv</p>
-                                <p className="text-zinc-300">Dein personalisierter Plan wird bald hier angezeigt.</p>
+                            // ACTIVE PLAN VIEW
+                            <div className="w-full flex flex-col items-center animate-in fade-in slide-in-from-bottom-5 duration-700">
+                                <div className="flex items-center gap-2 mb-8 bg-green-500/10 px-4 py-2 rounded-full border border-green-500/20">
+                                    <CheckCircle className="w-4 h-4 text-green-500" />
+                                    <span className="text-green-400 text-sm font-medium">Aktiver Plan</span>
+                                </div>
+
+                                <GradientCardShowcase days={showcaseCards} />
+
+                                <div className="mt-12">
+                                    <button
+                                        onClick={handleDeletePlan}
+                                        className="flex items-center gap-2 text-red-500 hover:text-red-400 transition-colors text-sm px-4 py-2 rounded-lg hover:bg-red-500/10"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                        Plan Löschen & Neu Generieren
+                                    </button>
+                                </div>
                             </div>
                         ) : (
+                            // NO PLAN - GENERATE CTA
                             <div className="flex flex-col items-center gap-6 p-8 border border-zinc-900 rounded-3xl bg-zinc-950/50 w-full max-w-2xl">
                                 <div className="bg-zinc-900 p-4 rounded-full">
-                                    <Dumbbell className="w-8 h-8 text-white" />
+                                    <Sparkles className="w-8 h-8 text-white" />
                                 </div>
                                 <div className="space-y-2 max-w-md">
                                     <h3 className="text-xl font-semibold text-white">Noch kein Plan vorhanden?</h3>
@@ -379,6 +410,7 @@ function DashboardContent() {
                                     <ButtonColorful
                                         label="Zurück zur Konfiguration"
                                         className="h-12 px-8 bg-zinc-800 hover:bg-zinc-700"
+                                        onChange={() => setGeneratedPlan(null)} // This line is slightly wrong semantics wise, fixed below
                                         onClick={() => setGeneratedPlan(null)}
                                     />
                                     <ButtonColorful

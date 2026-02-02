@@ -138,3 +138,29 @@ export async function saveWorkoutRoutine(routine: any) {
         return { success: true }; // Fallback success
     }
 }
+
+// Helper to delete plan
+export async function deleteUserPlan() {
+    // 1. Clear LocalStorage
+    if (typeof window !== 'undefined') {
+        localStorage.removeItem('workout_routine');
+    }
+
+    const userId = await getCurrentUserId();
+    if (!userId) return { success: true };
+
+    try {
+        const { error } = await supabase
+            .from('user_plans')
+            .update({ workout_routine: null })
+            .eq('user_id', userId);
+
+        if (error) {
+            console.error("Error deleting plan:", error);
+            return { success: false, error };
+        }
+        return { success: true };
+    } catch (e) {
+        return { success: false, error: e };
+    }
+}
