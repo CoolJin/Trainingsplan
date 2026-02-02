@@ -10,6 +10,58 @@ import { GlareCard } from "@/components/ui/glare-card";
 import { useSearchParams, useRouter } from "next/navigation";
 import { GradientCardShowcase } from "@/components/ui/gradient-card-showcase";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GradientSelector, GradientOption } from "@/components/ui/gradient-selector-card";
+
+const TRAINING_FREQUENCY_OPTIONS: GradientOption[] = [
+    {
+        id: "2",
+        label: "2 Tage",
+        value: "2",
+        color: "#22c55e", // Green
+        gradientFrom: "#22c55e",
+        gradientTo: "#3b82f6",
+    },
+    {
+        id: "3",
+        label: "3 Tage",
+        value: "3",
+        color: "#3b82f6", // Blue
+        gradientFrom: "#3b82f6",
+        gradientTo: "#8b5cf6",
+    },
+    {
+        id: "4",
+        label: "4 Tage",
+        value: "4",
+        color: "#8b5cf6", // Purple
+        gradientFrom: "#8b5cf6",
+        gradientTo: "#a855f7",
+    },
+    {
+        id: "5",
+        label: "5 Tage",
+        value: "5",
+        color: "#a855f7", // Vivid Purple
+        gradientFrom: "#a855f7",
+        gradientTo: "#ec4899",
+    },
+    {
+        id: "6",
+        label: "6 Tage",
+        value: "6",
+        color: "#ec4899", // Pink
+        gradientFrom: "#ec4899",
+        gradientTo: "#f97316",
+    },
+    {
+        id: "7",
+        label: "7 Tage",
+        value: "7",
+        color: "#f97316", // Orange/Red
+        gradientFrom: "#f97316",
+        gradientTo: "#ef4444",
+    }
+];
 
 // Gradient colors cycle for the week
 const WEEK_GRADIENTS = [
@@ -330,20 +382,12 @@ function DashboardContent() {
                                             </label>
                                             <span className="text-2xl font-bold text-pink-500">{trainingDays}</span>
                                         </div>
-                                        <input
-                                            type="range"
-                                            min="2"
-                                            max="7"
-                                            step="1"
-                                            value={trainingDays}
-                                            onChange={(e) => setTrainingDays(parseInt(e.target.value))}
-                                            className="w-full h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-pink-500"
+                                        <GradientSelector
+                                            options={TRAINING_FREQUENCY_OPTIONS}
+                                            defaultSelected={trainingDays.toString()}
+                                            onSelectionChange={(option) => setTrainingDays(parseInt(option.value))}
+                                            className="w-full border-zinc-800 bg-zinc-900/50"
                                         />
-                                        <div className="flex justify-between text-xs text-zinc-500">
-                                            <span>Light</span>
-                                            <span>Moderate</span>
-                                            <span>Intense</span>
-                                        </div>
                                     </div>
 
                                     {/* Session Duration */}
