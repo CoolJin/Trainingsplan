@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 
 // Define menu items
 const menuItems = [
+    { id: 'profile', title: "Profil", icon: <User className="w-6 h-6" />, gradientFrom: "#f97316", gradientTo: "#ef4444" },
     { id: 'home', title: "Home", icon: <Home className="w-6 h-6" />, gradientFrom: "#a955ff", gradientTo: "#ea51ff" },
     { id: 'training', title: "Trainingsplan", icon: <Dumbbell className="w-6 h-6" />, gradientFrom: "#56CCF2", gradientTo: "#2F80ED" },
 ];

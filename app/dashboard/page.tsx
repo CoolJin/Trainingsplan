@@ -115,6 +115,13 @@ function DashboardContent() {
         loadProfile();
     }, []);
 
+    // Sync Tab with View
+    useEffect(() => {
+        if (view === 'profile') setActiveTab('profile');
+        if (view === 'training') setActiveTab('training');
+        if (!view || view === 'home') setActiveTab('home');
+    }, [view]);
+
     const hasTrainingPlan = !!generatedPlan;
 
     // CLIENT-SIDE GENERATION LOGIC
@@ -304,6 +311,68 @@ function DashboardContent() {
                         <p className="text-zinc-400 text-lg max-w-lg mx-auto">
                             Willkommen zurück zu deinem Training.
                         </p>
+                    </div>
+                )}
+
+                {/* PROFILE TAB */}
+                {!isReviewMode && activeTab === "profile" && (
+                    <div className="animate-in fade-in slide-in-from-left-10 duration-500 text-center flex flex-col items-center gap-6 w-full max-w-4xl">
+                        <div className="flex items-center gap-2 text-zinc-400 mb-2">
+                            <User className="w-5 h-5" />
+                            <span>Mein Account</span>
+                        </div>
+
+                        <h1 className="text-4xl font-bold mb-8">Dein Profil</h1>
+
+                        <div className="flex flex-wrap justify-center gap-6">
+                            {/* Stats Card (Reused from Review Mode) */}
+                            <GlareCard className="flex flex-col items-start justify-end py-8 px-6">
+                                <div className="font-bold text-white text-lg">Dein Profil</div>
+                                <div className="text-zinc-400 text-sm mb-4">Basisdaten</div>
+                                <div className="space-y-2 w-full">
+                                    <div className="flex justify-between border-b border-white/10 pb-1">
+                                        <span>Alter</span>
+                                        <span className="font-mono text-white">{userPlan?.age || '-'}</span>
+                                    </div>
+                                    <div className="flex justify-between border-b border-white/10 pb-1">
+                                        <span>Gewicht</span>
+                                        <span className="font-mono text-white">{userPlan?.weight || '-'} kg</span>
+                                    </div>
+                                    <div className="flex justify-between border-b border-white/10 pb-1">
+                                        <span>Größe</span>
+                                        <span className="font-mono text-white">{userPlan?.height || '-'} cm</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span>Geschlecht</span>
+                                        <span className="font-mono text-white capitalize">{userPlan?.gender || '-'}</span>
+                                    </div>
+                                </div>
+                            </GlareCard>
+
+                            {/* Goal Card (Reused from Review Mode) */}
+                            <GlareCard className="flex flex-col items-start justify-end py-8 px-6 bg-gradient-to-br from-indigo-900/50 to-purple-900/50">
+                                <div className="font-bold text-white text-lg">Dein Ziel</div>
+                                <div className="text-zinc-400 text-sm mb-4">Fokus</div>
+                                <div className="flex items-center gap-3">
+                                    <div className="p-3 bg-white/10 rounded-full">
+                                        {userPlan?.goal === 'build_muscle' ? <Dumbbell className="w-6 h-6 text-blue-400" /> :
+                                            userPlan?.goal === 'lose_weight' ? <Sparkles className="w-6 h-6 text-orange-400" /> :
+                                                <User className="w-6 h-6 text-green-400" />}
+                                    </div>
+                                    <span className="text-xl font-bold capitalize">
+                                        {userPlan?.goal?.replace('_', ' ') || 'General Fitness'}
+                                    </span>
+                                </div>
+                            </GlareCard>
+                        </div>
+
+                        <div className="mt-8">
+                            <ButtonColorful
+                                label="Profil Bearbeiten"
+                                className="h-12 px-8"
+                                onClick={() => router.push('/onboarding?edit=true')}
+                            />
+                        </div>
                     </div>
                 )}
 

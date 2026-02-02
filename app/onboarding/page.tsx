@@ -139,7 +139,7 @@ function OnboardingContent() {
                     console.log("Saved!", result);
                     if (isEditMode) {
                         // Redirect back to Review/Card view
-                        router.push('/dashboard?view=review');
+                        router.push('/dashboard?view=profile');
                     } else {
                         setPricingOpen(true);
                     }
