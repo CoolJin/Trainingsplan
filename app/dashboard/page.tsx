@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { DashboardDock } from "@/components/ui/dashboard-dock";
 import { ButtonColorful } from "@/components/ui/button-colorful";
 import { getUserProfile, saveWorkoutRoutine } from "@/lib/api";
-import { Dumbbell, User } from "lucide-react";
+import { Dumbbell, User, Calendar, Clock, Sparkles } from "lucide-react";
 import { GlareCard } from "@/components/ui/glare-card";
 import { useSearchParams, useRouter } from "next/navigation";
 import { GradientCardShowcase } from "@/components/ui/gradient-card-showcase";
@@ -29,6 +29,11 @@ function DashboardContent() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [generatedPlan, setGeneratedPlan] = useState<any>(null);
     const [isGenerating, setIsGenerating] = useState(false);
+
+    // New Configuration State
+    const [trainingDays, setTrainingDays] = useState(3);
+    const [sessionDuration, setSessionDuration] = useState("45-60 Min");
+    const [extraWishes, setExtraWishes] = useState("");
 
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -88,13 +93,22 @@ function DashboardContent() {
               - Geschlecht: ${userPlan?.gender || 'male'}
               - Gewicht: ${userPlan?.weight || 70}
               - Ziel: ${userPlan?.goal || 'General Fitness'}
+              
+              Präferenzen:
+              - Trainingstage pro Woche: ${trainingDays}
+              - Dauer pro Einheit: ${sessionDuration}
+              - Extra Wünsche/Einschränkungen: ${extraWishes || "Keine"}
 
               Anweisung:
               Erstelle ein Array mit genau 7 Objekten (für Montag bis Sonntag).
+              Verteile die ${trainingDays} Trainingstage sinnvoll auf die Woche. 
+              Die restlichen ${7 - trainingDays} Tage sollen "Active Recovery" oder "Rest Day" sein.
+
               Jedes Objekt soll enthalten:
               - "title": Der Fokus des Tages (z.B. "Push A", "Legs", "Active Recovery").
-              - "desc": NUR die Muskelgruppen oder Aktivität, extrem kurz (max 5 Wörter). Z.B. "Brust, Schultern, Trizeps" oder "Leichtes Cardio & Dehnen".
-              - "exercises": Array der Übungen.
+              - "desc": NUR die Muskelgruppen oder Aktivität, extrem kurz (max 5 Wörter). 
+                 WICHTIG: Wiederhole NICHT den Wochentag im Text! (Also NICHT "Montag: Brust", sondern nur "Brust").
+              - "exercises": Array der Übungen (bitte an die Dauer von ${sessionDuration} anpassen).
               
               JSON Struktur (Array):
               [
@@ -127,7 +141,6 @@ function DashboardContent() {
 
             if (!result) {
                 console.error("Alle Modelle fehlgeschlagen.");
-                // Provide specific advice based on the last error
                 if (lastError?.message?.includes("429")) {
                     throw new Error("Quota/Limit erreicht (429). Bitte warten oder API Plan prüfen.");
                 }
@@ -150,7 +163,7 @@ function DashboardContent() {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     const hydratedDays = daysArray.map((day: any, index: number) => ({
                         ...day,
-                        day_name: dayNames[index % 7] // Assign correct day name statically
+                        day_name: dayNames[index % 7]
                     }));
 
                     setGeneratedPlan({ days: hydratedDays });
@@ -261,69 +274,91 @@ function DashboardContent() {
 
                         {!generatedPlan ? (
                             <>
-                                <div className="text-center space-y-2">
-                                    <h2 className="text-3xl font-bold">Überprüfe deine Daten</h2>
+                                <div className="text-center space-y-2 mb-4">
+                                    <h2 className="text-3xl font-bold">Plan Konfigurieren</h2>
                                     <p className="text-zinc-400 max-w-lg mx-auto">
-                                        Diese Daten werden für die Generierung des Trainingsplans verwendet.
+                                        Passe deinen Plan an deine Bedürfnisse an.
                                     </p>
                                 </div>
 
-                                <div className="flex flex-wrap justify-center gap-6 w-full">
-                                    {/* Card 1: Age */}
-                                    <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
-                                        <h3 className="text-lg font-bold mb-1 text-zinc-400">Alter</h3>
-                                        <p className="text-4xl font-bold text-white">
-                                            {userPlan?.age || '-'}
-                                        </p>
-                                        <span className="text-sm text-zinc-500">Jahre</span>
-                                    </GlareCard>
+                                {/* Configuration Panel */}
+                                <div className="w-full max-w-2xl grid gap-6 p-6 bg-zinc-900/50 border border-zinc-800 rounded-2xl backdrop-blur-sm">
 
-                                    {/* Card 2: Weight */}
-                                    <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
-                                        <h3 className="text-lg font-bold mb-1 text-zinc-400">Gewicht</h3>
-                                        <p className="text-4xl font-bold text-white">
-                                            {userPlan?.weight || '-'}
-                                        </p>
-                                        <span className="text-sm text-zinc-500">{userPlan?.units === 'imperial' ? 'lbs' : 'kg'}</span>
-                                    </GlareCard>
-
-                                    {/* Card 3: Height */}
-                                    <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
-                                        <h3 className="text-lg font-bold mb-1 text-zinc-400">Größe</h3>
-                                        <p className="text-4xl font-bold text-white">
-                                            {userPlan?.height || '-'}
-                                        </p>
-                                        <span className="text-sm text-zinc-500">{userPlan?.units === 'imperial' ? 'ft' : 'cm'}</span>
-                                    </GlareCard>
-
-                                    {/* Card 4: Gender */}
-                                    <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
-                                        <h3 className="text-lg font-bold mb-1 text-zinc-400">Geschlecht</h3>
-                                        <div className="text-4xl font-bold text-white mb-2">
-                                            {userPlan?.gender === 'male' ? 'Männlich' : userPlan?.gender === 'female' ? 'Weiblich' : userPlan?.gender || '-'}
+                                    {/* Training Days */}
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <label className="flex items-center gap-2 text-white font-medium">
+                                                <Calendar className="w-4 h-4 text-pink-500" />
+                                                Trainingstage pro Woche
+                                            </label>
+                                            <span className="text-2xl font-bold text-pink-500">{trainingDays}</span>
                                         </div>
-                                        <User className="w-6 h-6 text-zinc-500" />
-                                    </GlareCard>
-
-                                    {/* Card 5: Goal */}
-                                    <GlareCard className="flex flex-col items-center justify-center p-6 text-center">
-                                        <h3 className="text-lg font-bold mb-1 text-zinc-400">Ziel</h3>
-                                        <div className="text-2xl font-bold text-white mb-2 capitalize break-words w-full">
-                                            {userPlan?.goal?.replace('_', ' ') || '-'}
+                                        <input
+                                            type="range"
+                                            min="1"
+                                            max="7"
+                                            step="1"
+                                            value={trainingDays}
+                                            onChange={(e) => setTrainingDays(parseInt(e.target.value))}
+                                            className="w-full h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-pink-500"
+                                        />
+                                        <div className="flex justify-between text-xs text-zinc-500">
+                                            <span>Light</span>
+                                            <span>Moderate</span>
+                                            <span>Intense</span>
                                         </div>
-                                        <Dumbbell className="w-6 h-6 text-zinc-500" />
-                                    </GlareCard>
+                                    </div>
+
+                                    {/* Session Duration */}
+                                    <div className="space-y-3">
+                                        <label className="flex items-center gap-2 text-white font-medium">
+                                            <Clock className="w-4 h-4 text-blue-500" />
+                                            Dauer pro Einheit
+                                        </label>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                            {["30 Min", "45-60 Min", "60-90 Min", "90+ Min"].map((dur) => (
+                                                <button
+                                                    key={dur}
+                                                    onClick={() => setSessionDuration(dur)}
+                                                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${sessionDuration === dur
+                                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                                                            : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                                                        }`}
+                                                >
+                                                    {dur}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Extra Wishes */}
+                                    <div className="space-y-3">
+                                        <label className="flex items-center gap-2 text-white font-medium">
+                                            <Sparkles className="w-4 h-4 text-amber-500" />
+                                            Extra Wünsche / Einschränkungen
+                                        </label>
+                                        <textarea
+                                            value={extraWishes}
+                                            onChange={(e) => setExtraWishes(e.target.value.slice(0, 100))}
+                                            placeholder="z.B. Knieschmerzen, Fokus auf Po, kein Cardio..."
+                                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-amber-500/50 resize-none h-24"
+                                        />
+                                        <div className="text-right text-xs text-zinc-500">
+                                            {extraWishes.length}/100
+                                        </div>
+                                    </div>
+
                                 </div>
 
-                                <div className="flex gap-4 mt-8 flex-wrap justify-center">
+                                <div className="flex gap-4 mt-4 flex-wrap justify-center">
                                     <ButtonColorful
-                                        label="Daten Bearbeiten"
+                                        label="Abbrechen"
                                         className="h-12 px-8 bg-zinc-800 hover:bg-zinc-700"
-                                        onClick={() => router.push('/onboarding?edit=true')}
+                                        onClick={() => router.push('/dashboard')}
                                         disabled={isGenerating}
                                     />
                                     <ButtonColorful
-                                        label={isGenerating ? "Generiere Plan..." : "Jetzt Generieren"}
+                                        label={isGenerating ? "Generiere Plan..." : "Plan Generieren"}
                                         className="h-12 px-8"
                                         onClick={handleGenerate}
                                         disabled={isGenerating}
@@ -341,6 +376,11 @@ function DashboardContent() {
                                 <GradientCardShowcase days={showcaseCards} />
 
                                 <div className="mt-8 flex gap-4">
+                                    <ButtonColorful
+                                        label="Zurück zur Konfiguration"
+                                        className="h-12 px-8 bg-zinc-800 hover:bg-zinc-700"
+                                        onClick={() => setGeneratedPlan(null)}
+                                    />
                                     <ButtonColorful
                                         label="Plan Speichern & Starten"
                                         className="h-12 px-8"
