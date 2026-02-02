@@ -11,6 +11,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { GradientCardShowcase } from "@/components/ui/gradient-card-showcase";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GradientSelector, GradientOption } from "@/components/ui/gradient-selector-card";
+import { CardStack, CardStackItem } from "@/components/ui/card-stack";
 
 const TRAINING_FREQUENCY_OPTIONS: GradientOption[] = [
     {
@@ -325,7 +326,57 @@ function DashboardContent() {
                                     <span className="text-green-400 text-sm font-medium">Aktiver Plan</span>
                                 </div>
 
-                                <GradientCardShowcase days={showcaseCards} />
+                                {(() => {
+                                    // Calculate 0-based index for Mon-Sun (Mon=0, Sun=6)
+                                    // JS getDay(): Sun=0, Mon=1...
+                                    const todayJs = new Date().getDay();
+                                    const currentDayIndex = (todayJs + 6) % 7;
+
+                                    return (
+                                        <CardStack
+                                            items={showcaseCards.map((card: any, idx: number) => ({
+                                                id: idx,
+                                                title: card.title, // Day Name
+                                                description: card.desc,
+                                                imageSrc: "", // No image for now, gradient will show
+                                                ctaLabel: "Starten"
+                                            }))}
+                                            initialIndex={currentDayIndex}
+                                            loop={false}
+                                            autoAdvance={false}
+                                            renderCard={(item, { active }) => (
+                                                <div className={`relative h-full w-full flex flex-col justify-between p-6 ${active ? 'opacity-100' : 'opacity-40'}`}
+                                                    style={{
+                                                        background: `linear-gradient(135deg, ${showcaseCards[item.id as number].gradientFrom}40, ${showcaseCards[item.id as number].gradientTo}20)`,
+                                                        border: '1px solid rgba(255,255,255,0.1)'
+                                                    }}
+                                                >
+                                                    {/* Content Top */}
+                                                    <div>
+                                                        <div className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-400">
+                                                            {item.title}
+                                                        </div>
+                                                        <div className="mt-2 text-zinc-300 text-sm whitespace-pre-wrap">
+                                                            {item.description}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Action Button (Only visible/interactive if active?) */}
+                                                    <div className="mt-4">
+                                                        <ButtonColorful
+                                                            label="Training Starten"
+                                                            className="w-full h-10 text-sm"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation(); // Don't trigger card click
+                                                                router.push('/dashboard?view=session&day=' + item.id);
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+                                        />
+                                    );
+                                })()}
 
                                 <div className="mt-12">
                                     <NativeDelete
