@@ -210,7 +210,8 @@ function DashboardContent() {
         await deleteUserPlan();
         setGeneratedPlan(null);
         setUserPlan({ ...userPlan, workout_routine: null });
-        window.location.href = '/dashboard';
+        router.push('/dashboard');
+        router.refresh();
     };
 
 
@@ -357,8 +358,8 @@ function DashboardContent() {
                                                     key={dur}
                                                     onClick={() => setSessionDuration(dur)}
                                                     className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${sessionDuration === dur
-                                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                                                            : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                                                        : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
                                                         }`}
                                                 >
                                                     {dur}
@@ -424,8 +425,9 @@ function DashboardContent() {
                                             try {
                                                 const res = await saveWorkoutRoutine(generatedPlan);
                                                 if (res.success) {
-                                                    // Force redirect to current Plan View
-                                                    window.location.href = '/dashboard?view=training';
+                                                    // Use Router to respect basePath like /Trainingsplan
+                                                    router.push('/dashboard?view=training');
+                                                    router.refresh();
                                                 } else {
                                                     alert("Fehler beim Speichern des Plans.");
                                                 }
