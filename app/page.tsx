@@ -4,10 +4,26 @@ import { FallingPattern } from "@/components/ui/falling-pattern";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 import { AuthModal } from "@/components/ui/auth-modal";
 import React, { useState } from "react";
+import { getUserProfile } from "@/lib/api";
 
 export default function Home() {
   const router = useRouter();
   const [authModalOpen, setAuthModalOpen] = useState(false);
+
+  const handleAuthSuccess = async () => {
+    try {
+      const profile = await getUserProfile();
+      // Heuristic: If profile has core data, they finished onboarding.
+      if (profile && (profile.age || profile.goal)) {
+        router.push("/dashboard");
+      } else {
+        router.push("/onboarding");
+      }
+    } catch (e) {
+      console.error("Auth redirect check failed:", e);
+      router.push("/onboarding");
+    }
+  };
 
   return (
     <main className="w-full relative min-h-screen">
@@ -44,7 +60,7 @@ export default function Home() {
       <AuthModal
         open={authModalOpen}
         onOpenChange={setAuthModalOpen}
-        onAuthSuccess={() => router.push("/onboarding")}
+        onAuthSuccess={handleAuthSuccess}
       />
     </main>
   );

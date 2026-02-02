@@ -10,6 +10,7 @@ import { ModalPricing } from "@/components/ui/modal-pricing";
 import { getUserProfile, saveUserPlan, saveOnboardingData } from "@/lib/api";
 
 interface OnboardingFormData {
+    name: string;
     units: string;
     gender: string;
     age: string;
@@ -26,9 +27,10 @@ function OnboardingContent() {
     const isEditMode = searchParams.get('edit') === 'true';
 
     const [step, setStep] = useState(1);
-    const totalSteps = 3;
+    const totalSteps = 4; // 1: Name, 2: Units, 3: Biometrics, 4: Goals
 
     const [formData, setFormData] = useState<OnboardingFormData>({
+        name: "",
         units: "metric", // 'metric' | 'imperial'
         gender: "",
         age: "",
@@ -40,16 +42,10 @@ function OnboardingContent() {
     });
 
     const [isSaving, setIsSaving] = useState(false);
-    const [authModalOpen, setAuthModalOpen] = useState(false);
     const [pricingOpen, setPricingOpen] = useState(false);
 
     // If editing, maybe pre-fill data effectively?
     // We assume data is already in formData state or fetched.
-    // For now, if we redirect to edit, we assume state is lost unless we fetch it.
-    // BUT the user didn't ask to FETCH existing data, just "Edit".
-    // If we just "Edit", we start blank unless we load it.
-    // Let's assume for this MVP we just let them restart onboarding to overwrite.
-    // Or we should load it.
     useEffect(() => {
         if (isEditMode) {
             console.log("Edit Mode Active - Should fetch current data ideally.");
@@ -59,6 +55,7 @@ function OnboardingContent() {
                     const profile = await getUserProfile();
                     if (profile) {
                         setFormData({
+                            name: profile.name || "",
                             units: profile.units || "metric",
                             gender: profile.gender || "",
                             age: profile.age?.toString() || "",
@@ -93,14 +90,16 @@ function OnboardingContent() {
     // Helper to check if the current step is fully valid
     const isStepValid = () => {
         switch (step) {
-            case 1: // Units selection
+            case 1: // Name
+                return !!formData.name && formData.name.length > 1;
+            case 2: // Units
                 return !!formData.units;
-            case 2: // Biometrics
+            case 3: // Biometrics
                 return isFieldValid('age') &&
                     isFieldValid('height') &&
                     isFieldValid('weight') &&
                     !!formData.gender;
-            case 3: // Goals
+            case 4: // Goals
                 return !!formData.goal;
             default:
                 return true;
@@ -185,17 +184,45 @@ function OnboardingContent() {
         >
             {/* Header / Logo */}
             <div className="w-full max-w-md pt-8 flex justify-center z-10">
-                {/* Logo placeholder or simple text */}
                 <h1 className="text-xl font-bold tracking-wider text-white/80">FITNESS APP</h1>
             </div>
 
             {/* Content Container */}
             <div className="w-full max-w-md flex-1 relative z-10">
                 <AnimatePresence mode="wait">
-                    {/* STEP 1: UNITS */}
+                    {/* STEP 1: NAME */}
                     {step === 1 && (
                         <motion.div
-                            key="step1"
+                            key="step1-name"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="w-full flex flex-col gap-8"
+                        >
+                            <h2 className="text-3xl font-bold text-center">Wie heißt du?</h2>
+                            <div className="space-y-4">
+                                <p className="text-gray-400 text-center text-sm">Damit wir dich persönlich ansprechen können.</p>
+                                <input
+                                    type="text"
+                                    value={formData.name || ""}
+                                    onChange={(e) => updateData("name", e.target.value)}
+                                    placeholder="Dein Vorname"
+                                    disabled={isSaving}
+                                    className={cn(
+                                        "w-full bg-white/5 border border-white/10 rounded-xl p-4 text-lg focus:outline-none focus:border-primary transition-colors text-center",
+                                        formData.name === "" ? "" : (formData.name?.length || 0) < 2 ? "border-red-500" : "border-green-500/50",
+                                        isSaving && "opacity-50 cursor-not-allowed"
+                                    )}
+                                    autoFocus
+                                />
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {/* STEP 2: UNITS */}
+                    {step === 2 && (
+                        <motion.div
+                            key="step2-units"
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20 }}
@@ -254,10 +281,10 @@ function OnboardingContent() {
                         </motion.div>
                     )}
 
-                    {/* STEP 2: DETAILS */}
-                    {step === 2 && (
+                    {/* STEP 3: DETAILS */}
+                    {step === 3 && (
                         <motion.div
-                            key="step2"
+                            key="step3-details"
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20 }}
@@ -343,10 +370,10 @@ function OnboardingContent() {
                         </motion.div>
                     )}
 
-                    {/* STEP 3: GOALS */}
-                    {step === 3 && (
+                    {/* STEP 4: GOALS */}
+                    {step === 4 && (
                         <motion.div
-                            key="step3"
+                            key="step4-goals"
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20 }}

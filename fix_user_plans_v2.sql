@@ -5,6 +5,7 @@ drop table if exists public.user_plans;
 create table public.user_plans (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users(id) on delete cascade not null unique,
+  name text,
   units text,
   gender text,
   age int,
