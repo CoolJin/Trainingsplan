@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { DashboardDock } from "@/components/ui/dashboard-dock";
 import { ButtonColorful } from "@/components/ui/button-colorful";
 import { getUserProfile, saveWorkoutRoutine, deleteUserPlan } from "@/lib/api";
-import { Dumbbell, User, Calendar, Clock, Sparkles, CheckCircle } from "lucide-react";
+import { Dumbbell, User, Calendar, Clock, Sparkles, CheckCircle, Info, ArrowLeft } from "lucide-react";
 import { NativeDelete } from "@/components/ui/delete-button";
 import { GlareCard } from "@/components/ui/glare-card";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -119,6 +119,7 @@ function DashboardContent() {
     useEffect(() => {
         if (view === 'profile') setActiveTab('profile');
         if (view === 'training') setActiveTab('training');
+        if (view === 'session') setActiveTab('session');
         if (!view || view === 'home') setActiveTab('home');
     }, [view]);
 
@@ -173,9 +174,15 @@ function DashboardContent() {
 
               Jedes Objekt soll enthalten:
               - "title": Der Fokus des Tages (z.B. "Push A", "Legs", "Active Recovery").
-              - "desc": NUR die Muskelgruppen oder Aktivität, extrem kurz (max 5 Wörter). 
-                 WICHTIG: Wiederhole NICHT den Wochentag im Text! (Also NICHT "Montag: Brust", sondern nur "Brust").
-              - "exercises": Array der Übungen (bitte an die Dauer von ${sessionDuration} anpassen).
+              - "desc": NUR die Muskelgruppen oder Aktivität, extrem kurz (max 5 Wörter).
+              - "exercises": Array der Übungen (ca. 4-7 Übungen, passend zu ${sessionDuration}).
+              
+              WICHTIG für Übungen:
+              Jede Übung im Array MUSS folgende Felder haben:
+              - "name": Name der Übung (Deutsch).
+              - "sets": Anzahl Sätze (als String, z.B. "3").
+              - "reps": Wiederholungen (z.B. "8-12", "5x5"). Pass diese an das Ziel "${userPlan?.goal || 'Fitness'}" an!
+              - "notes": Ein kurzer Tipp zur Ausführung (z.B. "Ellenbogen eng", "Explosiv").
               
               JSON Struktur (Array):
               [
@@ -434,7 +441,7 @@ function DashboardContent() {
                                                     {/* Action Button (Only visible/interactive if active?) */}
                                                     <div className="mt-4">
                                                         <ButtonColorful
-                                                            label="Training Starten"
+                                                            label="Training anzeigen"
                                                             className="w-full h-10 text-sm"
                                                             onClick={(e) => {
                                                                 e.stopPropagation(); // Don't trigger card click
@@ -476,6 +483,90 @@ function DashboardContent() {
                                 />
                             </div>
                         )}
+                    </div>
+                )}
+
+                {/* SESSION VIEW */}
+                {!isReviewMode && activeTab === "session" && (
+                    <div className="animate-in fade-in slide-in-from-right-10 duration-500 w-full max-w-3xl flex flex-col gap-6">
+                        {/* Header / Back */}
+                        <div className="flex items-center gap-4 mb-4">
+                            <button onClick={() => router.push('/dashboard?view=training')} className="p-2 bg-zinc-800 rounded-full hover:bg-zinc-700 transition-colors">
+                                <ArrowLeft className="w-6 h-6" />
+                            </button>
+                            <h1 className="text-2xl font-bold">Trainingseinheit</h1>
+                        </div>
+
+                        {(() => {
+                            const dayId = searchParams.get('day');
+                            const dayIndex = dayId ? parseInt(dayId) : 0;
+                            const dayData = generatedPlan?.days?.[dayIndex];
+
+                            if (!dayData) return <div className="text-center p-8 text-zinc-500">Lade Training...</div>;
+
+                            return (
+                                <>
+                                    {/* Info Box */}
+                                    <div className="bg-gradient-to-r from-blue-900/40 to-indigo-900/40 border border-blue-500/20 p-4 rounded-xl flex gap-4">
+                                        <Info className="w-6 h-6 text-blue-400 shrink-0" />
+                                        <div className="text-sm text-blue-100/80">
+                                            <span className="font-bold text-blue-200 block mb-1">Coach Tipp</span>
+                                            {userPlan?.goal === 'build_muscle' ?
+                                                "Wähle das Gewicht so, dass du die angegebenen Wiederholungen gerade so sauber schaffst. Die letzte Wiederholung sollte schwer sein!" :
+                                                userPlan?.goal === 'lose_weight' ?
+                                                    "Halte die Pausen kurz (60s) und bleib in Bewegung. Intensität ist wichtig!" :
+                                                    "Achte besonders auf eine saubere Ausführung und kontrollierte Bewegungen."
+                                            }
+                                        </div>
+                                    </div>
+
+                                    {/* Header Card */}
+                                    <div className="p-6 rounded-2xl bg-zinc-900 border border-zinc-800">
+                                        <h2 className="text-3xl font-bold text-white mb-1">{dayData.title}</h2>
+                                        <p className="text-zinc-400">{dayData.desc}</p>
+                                        <div className="mt-4 flex gap-4 text-sm font-mono text-zinc-500">
+                                            <div className="flex items-center gap-1"><Clock className="w-4 h-4" /> {sessionDuration}</div>
+                                            <div className="flex items-center gap-1"><Dumbbell className="w-4 h-4" /> {dayData.exercises?.length || 0} Übungen</div>
+                                        </div>
+                                    </div>
+
+                                    {/* Exercise List */}
+                                    <div className="space-y-4">
+                                        {dayData.exercises?.map((ex: any, i: number) => (
+                                            <div key={i} className="bg-zinc-900/50 border border-zinc-800 p-4 rounded-xl flex flex-col gap-3">
+                                                <div className="flex justify-between items-start">
+                                                    <h3 className="font-bold text-lg">{ex.name}</h3>
+                                                    <div className="bg-zinc-800 px-3 py-1 rounded text-xs font-mono text-zinc-300">
+                                                        {ex.sets} Sätze
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex gap-4 text-sm">
+                                                    <div className="text-zinc-400">
+                                                        <span className="text-zinc-500 mr-2">Reps:</span>
+                                                        <span className="text-white font-medium">{ex.reps}</span>
+                                                    </div>
+                                                    {ex.notes && (
+                                                        <div className="text-zinc-400 italic">
+                                                            "{ex.notes}"
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Finish Button */}
+                                    <div className="mt-8 mb-12">
+                                        <ButtonColorful
+                                            label="Training Beenden"
+                                            className="w-full h-14 text-lg"
+                                            onClick={() => router.push('/dashboard?view=profile')} // Redirect to profile
+                                        />
+                                    </div>
+                                </>
+                            );
+                        })()}
                     </div>
                 )}
 
