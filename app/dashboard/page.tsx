@@ -369,7 +369,7 @@ function DashboardContent() {
                                                             className="w-full h-10 text-sm"
                                                             onClick={(e) => {
                                                                 e.stopPropagation(); // Don't trigger card click
-                                                                router.push('/dashboard?view=session&day=' + item.id);
+                                                                router.push('/dashboard?view=session&day=' + item.id, { scroll: false });
                                                             }}
                                                         />
                                                     </div>
