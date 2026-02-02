@@ -4,7 +4,8 @@ import { useState, useEffect, Suspense } from "react";
 import { DashboardDock } from "@/components/ui/dashboard-dock";
 import { ButtonColorful } from "@/components/ui/button-colorful";
 import { getUserProfile, saveWorkoutRoutine, deleteUserPlan } from "@/lib/api";
-import { Dumbbell, User, Calendar, Clock, Sparkles, Trash2, CheckCircle } from "lucide-react";
+import { Dumbbell, User, Calendar, Clock, Sparkles, CheckCircle } from "lucide-react";
+import { NativeDelete } from "@/components/ui/delete-button";
 import { GlareCard } from "@/components/ui/glare-card";
 import { useSearchParams, useRouter } from "next/navigation";
 import { GradientCardShowcase } from "@/components/ui/gradient-card-showcase";
@@ -205,13 +206,11 @@ function DashboardContent() {
     };
 
     const handleDeletePlan = async () => {
-        if (confirm("Möchtest du deinen Trainingsplan wirklich löschen?")) {
-            await deleteUserPlan();
-            setGeneratedPlan(null);
-            setUserPlan({ ...userPlan, workout_routine: null });
-            // Redirect to dashboard home to avoid confusion
-            window.location.href = '/dashboard';
-        }
+        // Now handled by NativeDelete UI expansion, but still needed as the action callback
+        await deleteUserPlan();
+        setGeneratedPlan(null);
+        setUserPlan({ ...userPlan, workout_routine: null });
+        window.location.href = '/dashboard';
     };
 
 
@@ -275,13 +274,11 @@ function DashboardContent() {
                                 <GradientCardShowcase days={showcaseCards} />
 
                                 <div className="mt-12">
-                                    <button
-                                        onClick={handleDeletePlan}
-                                        className="flex items-center gap-2 text-red-500 hover:text-red-400 transition-colors text-sm px-4 py-2 rounded-lg hover:bg-red-500/10"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                        Plan Löschen & Neu Generieren
-                                    </button>
+                                    <NativeDelete
+                                        onDelete={handleDeletePlan}
+                                        buttonText="Plan Löschen & Neu Generieren"
+                                        confirmText="Wirklich löschen?"
+                                    />
                                 </div>
                             </div>
                         ) : (
