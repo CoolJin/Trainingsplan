@@ -12,6 +12,7 @@ import { GradientCardShowcase } from "@/components/ui/gradient-card-showcase";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GradientSelector, GradientOption } from "@/components/ui/gradient-selector-card";
 import { CardStack, CardStackItem } from "@/components/ui/card-stack";
+import { QuantumPulseLoader } from "@/components/ui/quantum-pulse-loader";
 
 const TRAINING_FREQUENCY_OPTIONS: GradientOption[] = [
     {
@@ -490,88 +491,99 @@ function DashboardContent() {
                                 {/* STEP 2: CONFIGURATION */}
                                 {reviewStep === 2 && (
                                     <>
-                                        <div className="text-center space-y-2 mb-4">
-                                            <h2 className="text-3xl font-bold">Plan Konfigurieren</h2>
-                                            <p className="text-zinc-400 max-w-lg mx-auto">
-                                                Passe deinen Plan an deine Bedürfnisse an.
-                                            </p>
-                                        </div>
-
-                                        {/* Configuration Panel */}
-                                        <div className="w-full max-w-2xl grid gap-6 p-6 bg-zinc-900/50 border border-zinc-800 rounded-2xl backdrop-blur-sm">
-
-                                            {/* Training Days */}
-                                            <div className="space-y-3">
-                                                <div className="flex items-center justify-between">
-                                                    <label className="flex items-center gap-2 text-white font-medium">
-                                                        <Calendar className="w-4 h-4 text-pink-500" />
-                                                        Trainingstage pro Woche
-                                                    </label>
-                                                    <span className="text-2xl font-bold text-pink-500">{trainingDays}</span>
-                                                </div>
-                                                <GradientSelector
-                                                    options={TRAINING_FREQUENCY_OPTIONS}
-                                                    defaultSelected={trainingDays.toString()}
-                                                    onSelectionChange={(option) => setTrainingDays(parseInt(option.value))}
-                                                    className="w-full border-zinc-800 bg-zinc-900/50"
-                                                />
+                                        {isGenerating ? (
+                                            <div className="flex flex-col items-center justify-center min-h-[400px] animate-in fade-in duration-700">
+                                                <QuantumPulseLoader />
+                                                <p className="text-zinc-400 mt-8 animate-pulse text-center max-w-md">
+                                                    Dein Plan wird von der AI erstellt. Das kann einen Moment dauern...
+                                                </p>
                                             </div>
-
-                                            {/* Session Duration */}
-                                            <div className="space-y-3">
-                                                <label className="flex items-center gap-2 text-white font-medium">
-                                                    <Clock className="w-4 h-4 text-blue-500" />
-                                                    Dauer pro Einheit
-                                                </label>
-                                                <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
-                                                    {DURATION_OPTIONS.map((dur) => (
-                                                        <button
-                                                            key={dur}
-                                                            onClick={() => setSessionDuration(dur)}
-                                                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${sessionDuration === dur
-                                                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                                                                : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
-                                                                }`}
-                                                        >
-                                                            {dur}
-                                                        </button>
-                                                    ))}
+                                        ) : (
+                                            <>
+                                                <div className="text-center space-y-2 mb-4">
+                                                    <h2 className="text-3xl font-bold">Plan Konfigurieren</h2>
+                                                    <p className="text-zinc-400 max-w-lg mx-auto">
+                                                        Passe deinen Plan an deine Bedürfnisse an.
+                                                    </p>
                                                 </div>
-                                            </div>
 
-                                            {/* Extra Wishes */}
-                                            <div className="space-y-3">
-                                                <label className="flex items-center gap-2 text-white font-medium">
-                                                    <Sparkles className="w-4 h-4 text-amber-500" />
-                                                    Extra Wünsche / Einschränkungen
-                                                </label>
-                                                <textarea
-                                                    value={extraWishes}
-                                                    onChange={(e) => setExtraWishes(e.target.value.slice(0, 100))}
-                                                    placeholder="z.B. Knieschmerzen, Fokus auf Po, kein Cardio..."
-                                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-amber-500/50 resize-none h-24"
-                                                />
-                                                <div className="text-right text-xs text-zinc-500">
-                                                    {extraWishes.length}/100
+                                                {/* Configuration Panel */}
+                                                <div className="w-full max-w-2xl grid gap-6 p-6 bg-zinc-900/50 border border-zinc-800 rounded-2xl backdrop-blur-sm">
+
+                                                    {/* Training Days */}
+                                                    <div className="space-y-3">
+                                                        <div className="flex items-center justify-between">
+                                                            <label className="flex items-center gap-2 text-white font-medium">
+                                                                <Calendar className="w-4 h-4 text-pink-500" />
+                                                                Trainingstage pro Woche
+                                                            </label>
+                                                            <span className="text-2xl font-bold text-pink-500">{trainingDays}</span>
+                                                        </div>
+                                                        <GradientSelector
+                                                            options={TRAINING_FREQUENCY_OPTIONS}
+                                                            defaultSelected={trainingDays.toString()}
+                                                            onSelectionChange={(option) => setTrainingDays(parseInt(option.value))}
+                                                            className="w-full border-zinc-800 bg-zinc-900/50"
+                                                        />
+                                                    </div>
+
+                                                    {/* Session Duration */}
+                                                    <div className="space-y-3">
+                                                        <label className="flex items-center gap-2 text-white font-medium">
+                                                            <Clock className="w-4 h-4 text-blue-500" />
+                                                            Dauer pro Einheit
+                                                        </label>
+                                                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+                                                            {DURATION_OPTIONS.map((dur) => (
+                                                                <button
+                                                                    key={dur}
+                                                                    onClick={() => setSessionDuration(dur)}
+                                                                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${sessionDuration === dur
+                                                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                                                                        : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                                                                        }`}
+                                                                >
+                                                                    {dur}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Extra Wishes */}
+                                                    <div className="space-y-3">
+                                                        <label className="flex items-center gap-2 text-white font-medium">
+                                                            <Sparkles className="w-4 h-4 text-amber-500" />
+                                                            Extra Wünsche / Einschränkungen
+                                                        </label>
+                                                        <textarea
+                                                            value={extraWishes}
+                                                            onChange={(e) => setExtraWishes(e.target.value.slice(0, 100))}
+                                                            placeholder="z.B. Knieschmerzen, Fokus auf Po, kein Cardio..."
+                                                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-amber-500/50 resize-none h-24"
+                                                        />
+                                                        <div className="text-right text-xs text-zinc-500">
+                                                            {extraWishes.length}/100
+                                                        </div>
+                                                    </div>
+
                                                 </div>
-                                            </div>
 
-                                        </div>
-
-                                        <div className="flex gap-4 mt-4 flex-wrap justify-center">
-                                            <ButtonColorful
-                                                label="Zurück"
-                                                className="h-12 px-8 bg-zinc-800 hover:bg-zinc-700"
-                                                onClick={() => setReviewStep(1)}
-                                                disabled={isGenerating}
-                                            />
-                                            <ButtonColorful
-                                                label={isGenerating ? "Generiere Plan..." : "Plan Generieren"}
-                                                className="h-12 px-8"
-                                                onClick={handleGenerate}
-                                                disabled={isGenerating}
-                                            />
-                                        </div>
+                                                <div className="flex gap-4 mt-4 flex-wrap justify-center">
+                                                    <ButtonColorful
+                                                        label="Zurück"
+                                                        className="h-12 px-8 bg-zinc-800 hover:bg-zinc-700"
+                                                        onClick={() => setReviewStep(1)}
+                                                        disabled={isGenerating}
+                                                    />
+                                                    <ButtonColorful
+                                                        label={isGenerating ? "Generiere Plan..." : "Plan Generieren"}
+                                                        className="h-12 px-8"
+                                                        onClick={handleGenerate}
+                                                        disabled={isGenerating}
+                                                    />
+                                                </div>
+                                            </>
+                                        )}
                                     </>
                                 )}
                             </>
