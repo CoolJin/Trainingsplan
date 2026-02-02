@@ -332,7 +332,7 @@ function DashboardContent() {
                                         </div>
                                         <input
                                             type="range"
-                                            min="1"
+                                            min="2"
                                             max="7"
                                             step="1"
                                             value={trainingDays}
