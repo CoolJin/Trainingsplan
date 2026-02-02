@@ -71,7 +71,6 @@ function DashboardContent() {
             // Based on verification script: 
             // - 'gemini-flash-latest' WORKS (Success)
             // - 'gemini-2.0-flash' Exists (But hits Quota)
-            // - 'gemini-1.5' family returns 404 (on this key)
             const modelsToTry = [
                 "gemini-flash-latest",
                 "gemini-2.0-flash"
@@ -92,13 +91,16 @@ function DashboardContent() {
 
               Anweisung:
               Erstelle ein Array mit genau 7 Objekten (für Montag bis Sonntag).
-              Jedes Objekt soll enthalten: "title", "desc", "exercises".
+              Jedes Objekt soll enthalten:
+              - "title": Der Fokus des Tages (z.B. "Push A", "Legs", "Active Recovery").
+              - "desc": NUR die Muskelgruppen oder Aktivität, extrem kurz (max 5 Wörter). Z.B. "Brust, Schultern, Trizeps" oder "Leichtes Cardio & Dehnen".
+              - "exercises": Array der Übungen.
               
               JSON Struktur (Array):
               [
                   {
                     "title": "Push Day",
-                    "desc": "Brustfokus",
+                    "desc": "Brust, Schultern, Trizeps",
                     "exercises": [ { "name": "Bankdrücken", "sets": "3", "reps": "8-12", "notes": "..." } ]
                   }
               ]
@@ -187,8 +189,10 @@ function DashboardContent() {
 
     // Prepare Cards for Showcase if plan exists
     const showcaseCards = generatedPlan?.days?.map((day: any, idx: number) => ({
-        title: day.title || day.day_name,
-        desc: day.desc || `Training für ${day.day_name}`,
+        // Fix: Title is ALWAYS the day name (Montag..Sonntag)
+        title: day.day_name,
+        // Fix: Description combines the focus topic + brief muscle summary
+        desc: `${day.title || ''} \n ${day.desc || ''}`,
         dayIndex: idx,
         gradientFrom: WEEK_GRADIENTS[idx % 7].from,
         gradientTo: WEEK_GRADIENTS[idx % 7].to
